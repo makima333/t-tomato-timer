@@ -19,7 +19,6 @@ fn app_startup(app: &mut tauri::App) -> Result<(), Box<dyn Error>> {
             return Err("Failed to get app directory".into());
         }
     }
-
     Ok(())
 }
 

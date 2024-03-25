@@ -7,9 +7,10 @@
   },
   "package": {
     "productName": "t-tomato-timer",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   "tauri": {
+
     "allowlist": {
       "all": false,
       "window": {
@@ -71,7 +72,8 @@
         "resizable": false,
         "title": "t-tomato-timer",
         "width": 600,
-        "decorations": false
+        "decorations": false,
+        "transparent": true
       }
     ]
   }

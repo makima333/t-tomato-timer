@@ -36,6 +36,12 @@
 
 	// タイマーを開始する関数
 	function startTimer() {
+		// TODO: Timer Status Store
+		if (intervalId === -1) {
+			intervalId = undefined;
+		} else {
+			time.update((n) => n - 1);
+		}
 		if (intervalId) {
 			clearInterval(intervalId);
 		}
@@ -62,7 +68,7 @@
 	}
 
 	function toggleTimer() {
-		if (intervalId === undefined) {
+		if (intervalId === undefined || intervalId === -1) {
 			startTimer();
 		} else {
 			pauseTimer();
@@ -72,7 +78,7 @@
 	// タイマーを一時停止する関数
 	function pauseTimer() {
 		clearInterval(intervalId);
-		intervalId = undefined;
+		intervalId = -1;
 		playPauseToggle.set(true);
 	}
 
@@ -104,12 +110,12 @@
 	});
 </script>
 
-<main class="drawer drawer-end">
+<main class="drawer drawer-end bg-base-100 rounded-lg">
 	<input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
 	<div class="drawer-content">
-		<div data-tauri-drag-region class="titlebar h-4 bg-slate-400 flex justify-between">
+		<div data-tauri-drag-region class="titlebar h-4 bg-slate-400 flex justify-between rounded-t-lg">
 			<div></div>
-			<button on:click={closeWindow}>
+			<button on:click={closeWindow} class="mr-2">
 				<CloseButton />
 			</button>
 		</div>
@@ -119,15 +125,9 @@
 					<li>
 						<div class="timeline-middle">
 							{#if $workBreakToggle === true}
-								<div
-									class={`w-2 h-6 mr-1 rounded-sm bg-info outline outline-1`}
-									out:fade={{ duration: 300 }}
-								></div>
+								<div class={`w-2 h-6 mr-1 rounded-sm bg-info outline outline-1`}></div>
 							{:else}
-								<div
-									class={`w-2 h-6 mr-1 rounded-sm bg-success outline outline-1`}
-									out:fade={{ duration: 300 }}
-								></div>
+								<div class={`w-2 h-6 mr-1 rounded-sm bg-success outline outline-1`}></div>
 							{/if}
 						</div>
 					</li>
@@ -164,3 +164,9 @@
 		</div>
 	</div>
 </main>
+
+<style>
+	:root {
+		background-color: transparent !important;
+	}
+</style>
