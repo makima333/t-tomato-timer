@@ -10,6 +10,7 @@
     "version": "0.1.0"
   },
   "tauri": {
+    "macOSPrivateApi": true,
     "allowlist": {
       "all": false,
       "window": {
@@ -71,7 +72,8 @@
         "resizable": false,
         "title": "t-tomato-timer",
         "width": 600,
-        "decorations": false
+        "decorations": false,
+        "transparent": true
       }
     ]
   }
