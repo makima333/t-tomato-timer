@@ -39,6 +39,7 @@
 		if (intervalId) {
 			clearInterval(intervalId);
 		}
+		time.update((n) => n - 1);
 		intervalId = setInterval(() => {
 			time.update((n) => {
 				if (n === 0) {
