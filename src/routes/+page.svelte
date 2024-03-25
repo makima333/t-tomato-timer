@@ -36,10 +36,15 @@
 
 	// タイマーを開始する関数
 	function startTimer() {
+		// TODO: Timer Status Store
+		if (intervalId === -1) {
+			intervalId = undefined;
+		} else {
+			time.update((n) => n - 1);
+		}
 		if (intervalId) {
 			clearInterval(intervalId);
 		}
-		time.update((n) => n - 1);
 		intervalId = setInterval(() => {
 			time.update((n) => {
 				if (n === 0) {
@@ -63,7 +68,7 @@
 	}
 
 	function toggleTimer() {
-		if (intervalId === undefined) {
+		if (intervalId === undefined || intervalId === -1) {
 			startTimer();
 		} else {
 			pauseTimer();
@@ -73,7 +78,7 @@
 	// タイマーを一時停止する関数
 	function pauseTimer() {
 		clearInterval(intervalId);
-		intervalId = undefined;
+		intervalId = -1;
 		playPauseToggle.set(true);
 	}
 
