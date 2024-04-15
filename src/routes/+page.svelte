@@ -119,13 +119,13 @@
 				<CloseButton />
 			</button>
 		</div>
-		<div class="ml-4 py-2 flex flex-1 justify-between">
-			<ul class="timeline w-[300px]">
+		<div class="ml-4 flex flex-1 justify-between">
+			<ul class="timeline w-[250px]">
 				{#each items as { }}
 					<li>
 						<div class="timeline-middle">
 							{#if $workBreakToggle === true}
-								<div class={`w-2 h-6 mr-1 rounded-sm bg-info outline outline-1`}></div>
+								<div class={`w-1.5 h-3 mr-1 rounded-sm bg-info outline outline-1`}></div>
 							{:else}
 								<div class={`w-2 h-6 mr-1 rounded-sm bg-success outline outline-1`}></div>
 							{/if}
@@ -151,7 +151,7 @@
 				<button class="btn btn-sm btn-ghost mr-1" on:click={stopTimer}>
 					<StopButton />
 				</button>
-				<label for="my-drawer-2" class="btn btn-sm btn-ghost drawer-button ml-5">
+				<label for="my-drawer-2" class="btn btn-sm btn-ghost drawer-button">
 					<MenuButton />
 				</label>
 			</div>
@@ -159,7 +159,7 @@
 	</div>
 	<div class="drawer-side">
 		<label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label>
-		<div class="menu menu-horizontal w-screen h-full bg-neutral text-base-content flex fles-1">
+		<div class=" w-screen h-full bg-neutral text-base-content flex fles-1">
 			<MainMenu {closeDrawer} />
 		</div>
 	</div>

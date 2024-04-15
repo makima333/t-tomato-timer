@@ -68,10 +68,10 @@
     "windows": [
       {
         "fullscreen": false,
-        "height": 65,
-        "resizable": false,
+        "height": 50,
+        "resizable": true,
         "title": "t-tomato-timer",
-        "width": 600,
+        "width": 500,
         "decorations": false,
         "transparent": true
       }

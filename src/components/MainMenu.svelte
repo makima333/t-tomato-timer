@@ -34,8 +34,8 @@
 	}
 </script>
 
-<div>
-	<button class="btn" on:click={closeDrawer}>
+<div class="flex items-center justify-center space-x-1">
+	<button class="btn btn-ghost btn-square" on:click={closeDrawer}>
 		<CloseMenu />
 	</button>
 	<button class="btn" on:click={toggleAlwaysOnTop}>
