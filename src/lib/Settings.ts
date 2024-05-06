@@ -1,36 +1,63 @@
 import { readTextFile, writeTextFile, BaseDirectory } from '@tauri-apps/api/fs';
-import { writable, derived } from 'svelte/store';
+import { writable, get, type Invalidator, type Subscriber } from 'svelte/store';
 
 const FILENAME = 'config.json';
-let initialized = false;
-
 const defaultSettings = {
 	alertSound: true,
 	alwaysOnTop: false
 };
-export const Settings = writable(defaultSettings);
 
-export async function initializeSettings() {
-	if (initialized) return;
-	try {
-		const config = await readTextFile(FILENAME, { dir: BaseDirectory.AppConfig });
-		Settings.set(JSON.parse(config));
-	} catch (e) {
-		console.error(e);
-		Settings.set(defaultSettings);
+class SettingsStore {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	private store;
+
+	constructor() {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		this.store = writable<Record<string, any>>(defaultSettings);
+		this.load();
 	}
-	initialized = true;
+
+	get settings() {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		return get<Record<string, any>>(this.store);
+	}
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	set(key: string, value: any): any {
+		this.store.update((settings) => {
+			settings[key] = value;
+			return settings;
+		});
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const tmp = get<Record<string, any>>(this.store);
+		console.log('set', tmp['alwaysOnTop']);
+		this.save();
+		return value;
+	}
+
+	subscribe(
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		run: Subscriber<Record<string, any>>,
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		invalidate?: Invalidator<Record<string, any>> | undefined
+	) {
+		return this.store.subscribe(run, invalidate);
+	}
+
+	private async load() {
+		try {
+			const config = await readTextFile(FILENAME, { dir: BaseDirectory.AppConfig });
+			this.store.set(JSON.parse(config));
+		} catch (e) {
+			console.error(e);
+			this.store.set(defaultSettings);
+			this.save();
+		}
+	}
+
+	private save() {
+		writeTextFile(FILENAME, JSON.stringify(get(this.store)), { dir: BaseDirectory.AppConfig });
+	}
 }
 
-Settings.subscribe((value) => {
-	if (!initialized) return; // 設定が初期化されるのを待つ
-	writeTextFile(FILENAME, JSON.stringify(value), { dir: BaseDirectory.AppConfig });
-});
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function UpdateSetting(key: string, value: any) {
-	Settings.update((settings) => ({ ...settings, [key]: value }));
-}
-
-export const isSoundOn = derived(Settings, ($Settings) => $Settings.alertSound ?? true);
-export const isAlwaysOnTop = derived(Settings, ($Settings) => $Settings.alwaysOnTop ?? false);
+export const settings = new SettingsStore();

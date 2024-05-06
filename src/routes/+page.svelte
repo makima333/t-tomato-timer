@@ -13,7 +13,7 @@
 	import PauseButton from '../icons/Pause.svelte';
 	import MenuButton from '../icons/Menu.svelte';
 	import AlertWav from '../assets/alert.wav';
-	import { initializeSettings, isAlwaysOnTop, isSoundOn } from '$lib/Settings';
+	import { settings } from '$lib/Settings';
 	import { SetAlwaysOnTopOn } from '$lib/WindowApi';
 
 	const WORKTIME = 25;
@@ -24,15 +24,14 @@
 	let intervalId: number | undefined = undefined;
 	let playPauseToggle = writable(true);
 	let workBreakToggle = writable(true);
-
 	let audioPlayer = new AudioPlayer(AlertWav, 2);
 
-	(async () => {
-		await initializeSettings();
-		if ($isAlwaysOnTop) {
-			SetAlwaysOnTopOn();
-		}
-	})();
+	$: isAlwaysOnTop = $settings['alwaysOnTop'] as boolean;
+	$: isSoundOn = $settings['alertSound'] as boolean;
+
+	if (isAlwaysOnTop) {
+		SetAlwaysOnTopOn();
+	}
 
 	// タイマーを開始する関数
 	function startTimer() {
@@ -48,7 +47,7 @@
 		intervalId = setInterval(() => {
 			time.update((n) => {
 				if (n === 0) {
-					if ($isSoundOn) {
+					if (isSoundOn) {
 						audioPlayer.playAudio();
 					}
 					clearInterval(intervalId);
@@ -75,14 +74,12 @@
 		}
 	}
 
-	// タイマーを一時停止する関数
 	function pauseTimer() {
 		clearInterval(intervalId);
 		intervalId = -1;
 		playPauseToggle.set(true);
 	}
 
-	// タイマーを停止する関数
 	function stopTimer() {
 		clearInterval(intervalId);
 		intervalId = undefined;
@@ -157,7 +154,7 @@
 			</div>
 		</div>
 	</div>
-	<div class="drawer-side">
+	<div class="drawer-side h-12">
 		<label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label>
 		<div class=" w-screen h-full bg-neutral text-base-content flex fles-1">
 			<MainMenu {closeDrawer} />

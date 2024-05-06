@@ -10,22 +10,24 @@
 	import SoundOn from '../icons/SoundOn.svelte';
 	import SoundOff from '../icons/SoundOff.svelte';
 	import AlertWav from '../assets/alert.wav';
-	import { isSoundOn, isAlwaysOnTop } from '$lib/Settings';
+	import { settings } from '$lib/Settings';
+
+	let audioPlayer = new AudioPlayer(AlertWav, 1);
+
+	$: isAlwaysOnTop = $settings.alwaysOnTop;
+	$: isSoundOn = $settings.alertSound;
+	$: clsAlwaysOnTop = isAlwaysOnTop ? 'text-primary' : '';
 
 	function toggleAlwaysOnTop() {
-		if ($isAlwaysOnTop) {
+		if (isAlwaysOnTop) {
 			SetAlwaysOnTopOff();
 		} else {
 			SetAlwaysOnTopOn();
 		}
 	}
 
-	$: clsAlwaysOnTop = $isAlwaysOnTop ? 'text-primary' : '';
-
-	let audioPlayer = new AudioPlayer(AlertWav, 1);
-
 	function handleClick() {
-		if ($isSoundOn) {
+		if (isSoundOn) {
 			SetSoundOff();
 		} else {
 			audioPlayer.playAudio();
@@ -42,7 +44,7 @@
 		<AlwaysOnTop cls={clsAlwaysOnTop} />
 	</button>
 	<button class="btn" on:click={handleClick}>
-		{#if $isSoundOn}
+		{#if isSoundOn}
 			<SoundOn />
 		{:else}
 			<SoundOff />
