@@ -102,6 +102,15 @@
 		items = Array.from({ length: value }, (_, i) => i + 1);
 	});
 
+	function onkeydown(event: KeyboardEvent) {
+		if (event.key === ' ') {
+			toggleTimer();
+		}
+		if (event.key === 'Escape') {
+			stopTimer();
+		}
+	}
+
 	onDestroy(async () => {
 		clearInterval(intervalId);
 	});
@@ -161,6 +170,8 @@
 		</div>
 	</div>
 </main>
+
+<svelte:window on:keydown|preventDefault={onkeydown} />
 
 <style>
 	:root {
