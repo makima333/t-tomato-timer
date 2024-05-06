@@ -28,9 +28,6 @@ class SettingsStore {
 			settings[key] = value;
 			return settings;
 		});
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const tmp = get<Record<string, any>>(this.store);
-		console.log('set', tmp['alwaysOnTop']);
 		this.save();
 		return value;
 	}
