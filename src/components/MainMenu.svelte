@@ -4,6 +4,7 @@
 	import { SetAlwaysOnTopOn, SetAlwaysOnTopOff } from '$lib/WindowApi';
 	import { SetSoundOn, SetSoundOff } from '$lib/SoundToggle';
 	import { AudioPlayer } from '$lib/AudioPlay';
+	import { WithBlur } from '$lib/WithBlur';
 
 	import AlwaysOnTop from '../icons/AlwaysOnTop.svelte';
 	import CloseMenu from '../icons/CloseMenu.svelte';
@@ -37,7 +38,7 @@
 </script>
 
 <div class="flex items-center justify-center space-x-1">
-	<button class="btn btn-ghost btn-square" on:click={closeDrawer}>
+	<button class="btn btn-ghost btn-square" on:click={WithBlur(closeDrawer)}>
 		<CloseMenu />
 	</button>
 	<button class="btn" on:click={toggleAlwaysOnTop}>

@@ -6,6 +6,7 @@
 
 	import MainMenu from '../components/MainMenu.svelte';
 	import { AudioPlayer } from '$lib/AudioPlay';
+	import { WithBlur } from '$lib/WithBlur';
 
 	import CloseButton from '../icons/Close.svelte';
 	import PlayButton from '../icons/Play.svelte';
@@ -26,10 +27,8 @@
 	let workBreakToggle = writable(true);
 	let audioPlayer = new AudioPlayer(AlertWav, 2);
 
-	$: isAlwaysOnTop = $settings['alwaysOnTop'] as boolean;
 	$: isSoundOn = $settings['alertSound'] as boolean;
-
-	if (isAlwaysOnTop) {
+	$: if ($settings['alwaysOnTop']) {
 		SetAlwaysOnTopOn();
 	}
 
@@ -88,7 +87,7 @@
 		workBreakToggle.set(true);
 	}
 
-	function closeDrawer() {
+	function toggleDrawer() {
 		document.getElementById('my-drawer-2')?.click();
 	}
 
@@ -102,14 +101,31 @@
 		items = Array.from({ length: value }, (_, i) => i + 1);
 	});
 
+	const shortCutKeys = {
+		Space: ' ',
+		Esc: 'Escape'
+	};
+
 	function onkeydown(event: KeyboardEvent) {
-		if (event.key === ' ') {
-			toggleTimer();
+		if (event.key in shortCutKeys) {
+			event.preventDefault();
 		}
-		if (event.key === 'Escape') {
-			stopTimer();
+		switch (event.key) {
+			case shortCutKeys.Space:
+				toggleTimer();
+				break;
+			case shortCutKeys.Esc:
+				if ((document.getElementById('my-drawer-2') as HTMLInputElement)?.checked) {
+					toggleDrawer();
+				}
+				stopTimer();
+				break;
 		}
 	}
+
+	const playPauseClickHandler = WithBlur(toggleTimer);
+	const stopClickHandler = WithBlur(stopTimer);
+	const menuClickHnadler = WithBlur(toggleDrawer);
 
 	onDestroy(async () => {
 		clearInterval(intervalId);
@@ -147,31 +163,32 @@
 				{/if}m
 			</div>
 			<div class="flex items-center justify-center">
-				<button class="btn btn-sm btn-ghost mr-1" on:click={toggleTimer}>
+				<button class="btn btn-sm btn-ghost mr-1" on:click={playPauseClickHandler}>
 					{#if $playPauseToggle}
 						<PlayButton />
 					{:else}
 						<PauseButton />
 					{/if}
 				</button>
-				<button class="btn btn-sm btn-ghost mr-1" on:click={stopTimer}>
+				<button class="btn btn-sm btn-ghost mr-1" on:click={stopClickHandler}>
 					<StopButton />
 				</button>
-				<label for="my-drawer-2" class="btn btn-sm btn-ghost drawer-button">
+
+				<button class="btn btn-sm btn-ghost" on:click={menuClickHnadler}>
 					<MenuButton />
-				</label>
+				</button>
 			</div>
 		</div>
 	</div>
 	<div class="drawer-side h-12">
 		<label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label>
 		<div class=" w-screen h-full bg-neutral text-base-content flex fles-1">
-			<MainMenu {closeDrawer} />
+			<MainMenu closeDrawer={toggleDrawer} />
 		</div>
 	</div>
 </main>
 
-<svelte:window on:keydown|preventDefault={onkeydown} />
+<svelte:window on:keydown={onkeydown} />
 
 <style>
 	:root {
