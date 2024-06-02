@@ -193,7 +193,7 @@
 	</div>
 	<div class="drawer-side h-12">
 		<label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label>
-		<div class=" w-screen h-full bg-neutral text-base-content flex fles-1">
+		<div class=" w-screen bg-base-100 h-full text-base-content flex fles-1">
 			<MainMenu closeDrawer={toggleDrawer} />
 		</div>
 	</div>
