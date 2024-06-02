@@ -153,7 +153,7 @@
 			</button>
 		</div>
 		<div class="ml-4 flex flex-1 justify-between">
-			<ul class="timeline w-[{WORKTIME}px]">
+			<ul class="timeline">
 				{#each items as { }}
 					<li>
 						<div class="timeline-middle">
@@ -166,14 +166,14 @@
 					</li>
 				{/each}
 			</ul>
-			<div class="flex items-center justify-center" transition:fade>
-				{#if $time < 10}
-					0{$time}
-				{:else}
-					{$time}
-				{/if}m
-			</div>
 			<div class="flex items-center justify-center">
+				<div class="flex items-center justify-center mr-1" transition:fade>
+					{#if $time < 10}
+						0{$time}
+					{:else}
+						{$time}
+					{/if}m
+				</div>
 				<button class="btn btn-sm btn-ghost mr-1" on:click={playPauseClickHandler}>
 					{#if $playPauseToggle}
 						<PlayButton />
