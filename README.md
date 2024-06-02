@@ -9,8 +9,8 @@ A simple tomato timer for time management.
 - [x] Start/Pause/Reset timer
 - [x] Alway on top
 - [x] Alert when time is up
-- [ ] Start/Pause/Reset by hotkey
-- [ ] Customizable timer duration
+- [x] Start/Pause/Reset by hotkey
+- [x] Customizable timer duration
 - [ ] Auto start next timer
 - [ ] Set task name
 - [ ] Task history

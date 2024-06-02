@@ -1,13 +1,13 @@
 import { appWindow } from '@tauri-apps/api/window';
 
-import { settings } from './Settings';
+import { updateSettings } from './Settings';
 
 export function SetAlwaysOnTopOn() {
 	appWindow.setAlwaysOnTop(true);
-	settings.set('alwaysOnTop', true);
+	updateSettings('alwaysOnTop', true);
 }
 
 export function SetAlwaysOnTopOff() {
 	appWindow.setAlwaysOnTop(false);
-	settings.set('alwaysOnTop', false);
+	updateSettings('alwaysOnTop', false);
 }

@@ -1,12 +1,14 @@
 <script lang="ts">
-	import { onDestroy } from 'svelte';
-	import { writable } from 'svelte/store';
 	import { fade } from 'svelte/transition';
-	import { appWindow } from '@tauri-apps/api/window';
+	import { onDestroy, onMount } from 'svelte';
+	import { writable, get, derived } from 'svelte/store';
+	import { appWindow, LogicalSize } from '@tauri-apps/api/window';
 
 	import MainMenu from '../components/MainMenu.svelte';
 	import { AudioPlayer } from '$lib/AudioPlay';
 	import { WithBlur } from '$lib/WithBlur';
+	import { SetAlwaysOnTopOn } from '$lib/WindowApi';
+	import settingsStore, { loadSettings } from '$lib/Settings';
 
 	import CloseButton from '../icons/Close.svelte';
 	import PlayButton from '../icons/Play.svelte';
@@ -14,21 +16,21 @@
 	import PauseButton from '../icons/Pause.svelte';
 	import MenuButton from '../icons/Menu.svelte';
 	import AlertWav from '../assets/alert.wav';
-	import { settings } from '$lib/Settings';
-	import { SetAlwaysOnTopOn } from '$lib/WindowApi';
+	import { listen } from '@tauri-apps/api/event';
 
-	const WORKTIME = 25;
+	$: WORKTIME = $settingsStore.timeDuration as number;
 	const BREAKTIME = 5;
 	const INTERVAL = 1000 * 60;
 
-	let time = writable(WORKTIME);
 	let intervalId: number | undefined = undefined;
-	let playPauseToggle = writable(true);
-	let workBreakToggle = writable(true);
-	let audioPlayer = new AudioPlayer(AlertWav, 2);
+	const time = writable($settingsStore.timeDuration as number);
+	const playPauseToggle = writable(true);
+	const workBreakToggle = writable(true);
+	const audioPlayer = new AudioPlayer(AlertWav, 2);
 
-	$: isSoundOn = $settings['alertSound'] as boolean;
-	$: if ($settings['alwaysOnTop']) {
+	$: time.update(() => $settingsStore.timeDuration as number);
+	$: isSoundOn = $settingsStore['alertSound'] as boolean;
+	$: if ($settingsStore['alwaysOnTop']) {
 		SetAlwaysOnTopOn();
 	}
 
@@ -123,9 +125,18 @@
 		}
 	}
 
+	$: appWindow.setSize(new LogicalSize(300 + WORKTIME * 10, 50));
+
 	const playPauseClickHandler = WithBlur(toggleTimer);
 	const stopClickHandler = WithBlur(stopTimer);
 	const menuClickHnadler = WithBlur(toggleDrawer);
+
+	onMount(() => {
+		listen('settings-changed', async (event) => {
+			$settingsStore = await loadSettings();
+			stopTimer();
+		});
+	});
 
 	onDestroy(async () => {
 		clearInterval(intervalId);
@@ -142,7 +153,7 @@
 			</button>
 		</div>
 		<div class="ml-4 flex flex-1 justify-between">
-			<ul class="timeline w-[250px]">
+			<ul class="timeline w-[{WORKTIME}px]">
 				{#each items as { }}
 					<li>
 						<div class="timeline-middle">

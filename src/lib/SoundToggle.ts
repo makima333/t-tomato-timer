@@ -1,9 +1,9 @@
-import { settings } from './Settings';
+import { updateSettings } from './Settings';
 
 export function SetSoundOn() {
-	settings.set('alertSound', true);
+	updateSettings('alertSound', true);
 }
 
 export function SetSoundOff() {
-	settings.set('alertSound', false);
+	updateSettings('alertSound', false);
 }

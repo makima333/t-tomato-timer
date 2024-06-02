@@ -1,4 +1,5 @@
 {
     "alwaysOnTop": true,
-    "alertSound": true
+    "alertSound": true,
+    "timeDuration": 25
 }

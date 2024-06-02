@@ -1,22 +1,26 @@
 <script lang="ts">
 	export let closeDrawer = () => {};
 
+	import { WebviewWindow } from '@tauri-apps/api/window';
+	import { appWindow } from '@tauri-apps/api/window';
+
 	import { SetAlwaysOnTopOn, SetAlwaysOnTopOff } from '$lib/WindowApi';
 	import { SetSoundOn, SetSoundOff } from '$lib/SoundToggle';
 	import { AudioPlayer } from '$lib/AudioPlay';
 	import { WithBlur } from '$lib/WithBlur';
+	import settingsStore from '$lib/Settings';
 
 	import AlwaysOnTop from '../icons/AlwaysOnTop.svelte';
 	import CloseMenu from '../icons/CloseMenu.svelte';
+	import Settings from '../icons/Settings.svelte';
 	import SoundOn from '../icons/SoundOn.svelte';
 	import SoundOff from '../icons/SoundOff.svelte';
 	import AlertWav from '../assets/alert.wav';
-	import { settings } from '$lib/Settings';
 
 	let audioPlayer = new AudioPlayer(AlertWav, 1);
 
-	$: isAlwaysOnTop = $settings.alwaysOnTop;
-	$: isSoundOn = $settings.alertSound;
+	$: isAlwaysOnTop = $settingsStore.alwaysOnTop;
+	$: isSoundOn = $settingsStore.alertSound;
 	$: clsAlwaysOnTop = isAlwaysOnTop ? 'text-primary' : '';
 
 	function toggleAlwaysOnTop() {
@@ -35,6 +39,13 @@
 			SetSoundOn();
 		}
 	}
+
+	async function settingsClickHandler() {
+		const settingsWindow = new WebviewWindow('settings', {
+			url: '/settings',
+			title: 'Settings'
+		});
+	}
 </script>
 
 <div class="flex items-center justify-center space-x-1">
@@ -50,5 +61,8 @@
 		{:else}
 			<SoundOff />
 		{/if}
+	</button>
+	<button class="btn btn-ghost" on:click={settingsClickHandler}>
+		<Settings />
 	</button>
 </div>

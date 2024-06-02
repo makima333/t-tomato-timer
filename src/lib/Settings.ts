@@ -1,60 +1,42 @@
 import { readTextFile, writeTextFile, BaseDirectory } from '@tauri-apps/api/fs';
-import { writable, get, type Invalidator, type Subscriber } from 'svelte/store';
+import { writable } from 'svelte/store';
 
 const FILENAME = 'config.json';
 const defaultSettings = {
 	alertSound: true,
-	alwaysOnTop: false
+	alwaysOnTop: false,
+	timeDuration: 25
 };
 
-class SettingsStore {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	private store;
-
-	constructor() {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		this.store = writable<Record<string, any>>(defaultSettings);
-		this.load();
-	}
-
-	get settings() {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		return get<Record<string, any>>(this.store);
-	}
-
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	set(key: string, value: any): any {
-		this.store.update((settings) => {
-			settings[key] = value;
-			return settings;
-		});
-		this.save();
-		return value;
-	}
-
-	subscribe(
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		run: Subscriber<Record<string, any>>,
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		invalidate?: Invalidator<Record<string, any>> | undefined
-	) {
-		return this.store.subscribe(run, invalidate);
-	}
-
-	private async load() {
-		try {
-			const config = await readTextFile(FILENAME, { dir: BaseDirectory.AppConfig });
-			this.store.set(JSON.parse(config));
-		} catch (e) {
-			console.error(e);
-			this.store.set(defaultSettings);
-			this.save();
-		}
-	}
-
-	private save() {
-		writeTextFile(FILENAME, JSON.stringify(get(this.store)), { dir: BaseDirectory.AppConfig });
+export async function loadSettings() {
+	try {
+		const config = await readTextFile(FILENAME, { dir: BaseDirectory.AppConfig });
+		return JSON.parse(config);
+	} catch (error) {
+		return defaultSettings;
 	}
 }
 
-export const settings = new SettingsStore();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function saveSettings(settings: Record<string, any>) {
+	try {
+		await writeTextFile(FILENAME, JSON.stringify(settings), { dir: BaseDirectory.AppConfig });
+	} catch (error) {
+		console.error(error);
+	}
+}
+
+export function updateSettings(key: string, value: unknown) {
+	settingsStore.update((settings) => {
+		settings[key] = value;
+		return settings;
+	});
+}
+
+const initialSettings = await loadSettings();
+const settingsStore = writable(initialSettings);
+settingsStore.subscribe((value) => {
+	saveSettings(value);
+});
+
+export default settingsStore;
