@@ -5,7 +5,8 @@ const FILENAME = 'config.json';
 const defaultSettings = {
 	alertSound: true,
 	alwaysOnTop: false,
-	timeDuration: 25
+	timeDuration: 25,
+	breakDuration: 5
 };
 
 export async function loadSettings() {

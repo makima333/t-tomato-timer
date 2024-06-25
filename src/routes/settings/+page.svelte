@@ -3,19 +3,29 @@
 	import { emit } from '@tauri-apps/api/event';
 
 	let timeDuration = $settingsStore.timeDuration;
+	let breakDuration = $settingsStore.breakDuration;
 
 	async function save() {
 		$settingsStore.timeDuration = timeDuration;
+		$settingsStore.breakDuration = breakDuration;
 		emit('settings-changed', { $settingsStore });
 	}
 </script>
 
 <main>
-	<div class="p-4 space-y-3">
-		Time Duration (minutes)
-		<label class="input input-bordered flex items-center gap-4">
-			<input type="text" class="grow" bind:value={timeDuration} />
-		</label>
+	<div>
+		<div class="p-4">
+			Time Duration (minutes)
+			<label class="input input-bordered flex items-center gap-4">
+				<input type="text" class="grow" bind:value={timeDuration} />
+			</label>
+		</div>
+		<div class="p-4">
+			Break Duration (minutes)
+			<label class="input input-bordered flex items-center gap-4">
+				<input type="text" class="grow" bind:value={breakDuration} />
+			</label>
+		</div>
 	</div>
 	<!-- fotter -->
 	<div class="p-4 flex justify-end space-x-2">
