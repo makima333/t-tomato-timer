@@ -1,4 +1,5 @@
 {
+    "autoStartSessions": 3,
     "alwaysOnTop": true,
     "alertSound": true,
     "timeDuration": 25,

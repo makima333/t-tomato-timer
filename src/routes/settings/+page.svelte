@@ -4,10 +4,12 @@
 
 	let timeDuration = $settingsStore.timeDuration;
 	let breakDuration = $settingsStore.breakDuration;
+	let autoStartSessions = $settingsStore.autoStartSessions;
 
 	async function save() {
 		$settingsStore.timeDuration = timeDuration;
 		$settingsStore.breakDuration = breakDuration;
+		$settingsStore.autoStartSessions = autoStartSessions;
 		emit('settings-changed', { $settingsStore });
 	}
 </script>
@@ -24,6 +26,12 @@
 			Break Duration (minutes)
 			<label class="input input-bordered flex items-center gap-4">
 				<input type="number" class="grow" bind:value={breakDuration} />
+			</label>
+		</div>
+		<div class="p-4">
+			Auto Start Sessions
+			<label class="input input-bordered flex items-center gap-4">
+				<input type="number" class="grow" bind:value={autoStartSessions} />
 			</label>
 		</div>
 	</div>

@@ -3,6 +3,7 @@ import { writable } from 'svelte/store';
 
 const FILENAME = 'config.json';
 const defaultSettings = {
+	autoStartSessions: 3,
 	alertSound: true,
 	alwaysOnTop: false,
 	timeDuration: 25,
