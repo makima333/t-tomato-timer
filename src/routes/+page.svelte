@@ -98,10 +98,10 @@
 		appWindow.close();
 	}
 
-	let items = Array.from({ length: WORKTIME }, (_, i) => i + 1);
+	let worktimes = Array.from({ length: WORKTIME }, (_, i) => i + 1);
 
 	time.subscribe((value) => {
-		items = Array.from({ length: value }, (_, i) => i + 1);
+		worktimes = Array.from({ length: value }, (_, i) => i + 1);
 	});
 
 	const shortCutKeys = {
@@ -155,7 +155,7 @@
 		</div>
 		<div class="ml-4 flex flex-1 justify-between">
 			<ul class="timeline">
-				{#each items as { }}
+				{#each worktimes as { }}
 					<li>
 						<div class="timeline-middle">
 							{#if $workBreakToggle === true}
