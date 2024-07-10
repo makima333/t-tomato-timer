@@ -18,7 +18,7 @@
 	import AlertWav from '../assets/alert.wav';
 	import { listen } from '@tauri-apps/api/event';
 
-	$: WORKTIME = $settingsStore.timeDuration as number;
+	const WORKTIME = $settingsStore.timeDuration as number;
 	const BREAKTIME = $settingsStore.breakDuration as number;
 	const INTERVAL = 1000 * 60;
 	// const INTERVAL = 1;
@@ -134,8 +134,8 @@
 
 	onMount(() => {
 		listen('settings-changed', async (event) => {
-			$settingsStore = await loadSettings();
 			stopTimer();
+			$settingsStore = await loadSettings();
 		});
 	});
 
