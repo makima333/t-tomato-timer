@@ -17,13 +17,13 @@
 		<div class="p-4">
 			Time Duration (minutes)
 			<label class="input input-bordered flex items-center gap-4">
-				<input type="text" class="grow" bind:value={timeDuration} />
+				<input type="number" class="grow" bind:value={timeDuration} />
 			</label>
 		</div>
 		<div class="p-4">
 			Break Duration (minutes)
 			<label class="input input-bordered flex items-center gap-4">
-				<input type="text" class="grow" bind:value={breakDuration} />
+				<input type="number" class="grow" bind:value={breakDuration} />
 			</label>
 		</div>
 	</div>
