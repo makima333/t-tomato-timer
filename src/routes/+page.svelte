@@ -20,9 +20,10 @@
 
 	const WORKTIME = $settingsStore.timeDuration as number;
 	const BREAKTIME = $settingsStore.breakDuration as number;
-	const INTERVAL = 1000 * 60;
-	// const INTERVAL = 1;
+	// const INTERVAL = 1000 * 60;
+	const INTERVAL = 100;
 
+	let autoStartSessions = $settingsStore.autoStartSessions as number;
 	let intervalId: number | undefined = undefined;
 	const time = writable($settingsStore.timeDuration as number);
 	const playPauseToggle = writable(true);
@@ -47,6 +48,7 @@
 			clearInterval(intervalId);
 		}
 		intervalId = setInterval(() => {
+			let isFinished = false;
 			time.update((n) => {
 				if (n === 0) {
 					if (isSoundOn) {
@@ -57,13 +59,25 @@
 					playPauseToggle.set(true);
 					if ($workBreakToggle) {
 						workBreakToggle.set(false);
+						isFinished = true;
 						return BREAKTIME;
 					}
 					workBreakToggle.set(true);
+					isFinished = true;
 					return WORKTIME;
 				}
 				return n - 1;
 			});
+			if (isFinished && autoStartSessions > 0) {
+				if (get(time) === WORKTIME) {
+					autoStartSessions--;
+				}
+				if (autoStartSessions > 0) {
+					startTimer();
+				} else {
+					autoStartSessions = $settingsStore.autoStartSessions as number;
+				}
+			}
 		}, INTERVAL);
 		playPauseToggle.set(false);
 	}
@@ -88,6 +102,7 @@
 		time.set(WORKTIME);
 		playPauseToggle.set(true);
 		workBreakToggle.set(true);
+		autoStartSessions = $settingsStore.autoStartSessions as number;
 	}
 
 	function toggleDrawer() {
