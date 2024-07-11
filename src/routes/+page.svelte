@@ -20,8 +20,8 @@
 
 	const WORKTIME = $settingsStore.timeDuration as number;
 	const BREAKTIME = $settingsStore.breakDuration as number;
-	// const INTERVAL = 1000 * 60;
-	const INTERVAL = 100;
+	const INTERVAL = 1000 * 60;
+	// const INTERVAL = 100;
 
 	let autoStartSessions = $settingsStore.autoStartSessions as number;
 	let intervalId: number | undefined = undefined;
