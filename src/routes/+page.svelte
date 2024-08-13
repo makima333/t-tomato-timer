@@ -121,7 +121,9 @@
 
 	const shortCutKeys = {
 		Space: ' ',
-		Esc: 'Escape'
+		Esc: 'Escape',
+		Ctrl: 'Control',
+		keyT: 't'
 	};
 
 	function onkeydown(event: KeyboardEvent) {
@@ -137,6 +139,9 @@
 					toggleDrawer();
 				}
 				stopTimer();
+				break;
+			case event.ctrlKey && shortCutKeys.keyT:
+				console.log('Ctrl + key');
 				break;
 		}
 	}
