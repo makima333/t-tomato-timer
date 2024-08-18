@@ -174,66 +174,61 @@
 	});
 </script>
 
-{#if $isLoadedConfig}
-	<main class="drawer drawer-end bg-base-100 rounded-lg">
-		<input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
-		<div class="drawer-content">
-			<div
-				data-tauri-drag-region
-				class="titlebar h-4 bg-slate-400 flex justify-between rounded-t-lg"
-			>
-				<div></div>
-				<button on:click={closeWindow} class="mr-2">
-					<CloseButton />
+<main class="drawer drawer-end bg-base-100 rounded-lg">
+	<input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
+	<div class="drawer-content">
+		<div data-tauri-drag-region class="titlebar h-4 bg-slate-400 flex justify-between rounded-t-lg">
+			<div></div>
+			<button on:click={closeWindow} class="mr-2">
+				<CloseButton />
+			</button>
+		</div>
+		<div class="ml-4 flex flex-1 justify-between">
+			<ul class="timeline">
+				{#each worktimes as { }}
+					<li>
+						<div class="timeline-middle">
+							{#if $workBreakToggle === true}
+								<div class={`w-1.5 h-3 mr-1 rounded-sm bg-info outline outline-1`}></div>
+							{:else}
+								<div class={`w-2 h-6 mr-1 rounded-sm bg-success outline outline-1`}></div>
+							{/if}
+						</div>
+					</li>
+				{/each}
+			</ul>
+			<div class="flex items-center justify-center">
+				<div class="flex items-center justify-center mr-1" transition:fade>
+					{#if $time < 10}
+						0{$time}
+					{:else}
+						{$time}
+					{/if}m
+				</div>
+				<button class="btn btn-sm btn-ghost mr-1" on:click={playPauseClickHandler}>
+					{#if $playPauseToggle}
+						<PlayButton />
+					{:else}
+						<PauseButton />
+					{/if}
+				</button>
+				<button class="btn btn-sm btn-ghost mr-1" on:click={stopClickHandler}>
+					<StopButton />
+				</button>
+
+				<button class="btn btn-sm btn-ghost" on:click={menuClickHnadler}>
+					<MenuButton />
 				</button>
 			</div>
-			<div class="ml-4 flex flex-1 justify-between">
-				<ul class="timeline">
-					{#each worktimes as { }}
-						<li>
-							<div class="timeline-middle">
-								{#if $workBreakToggle === true}
-									<div class={`w-1.5 h-3 mr-1 rounded-sm bg-info outline outline-1`}></div>
-								{:else}
-									<div class={`w-2 h-6 mr-1 rounded-sm bg-success outline outline-1`}></div>
-								{/if}
-							</div>
-						</li>
-					{/each}
-				</ul>
-				<div class="flex items-center justify-center">
-					<div class="flex items-center justify-center mr-1" transition:fade>
-						{#if $time < 10}
-							0{$time}
-						{:else}
-							{$time}
-						{/if}m
-					</div>
-					<button class="btn btn-sm btn-ghost mr-1" on:click={playPauseClickHandler}>
-						{#if $playPauseToggle}
-							<PlayButton />
-						{:else}
-							<PauseButton />
-						{/if}
-					</button>
-					<button class="btn btn-sm btn-ghost mr-1" on:click={stopClickHandler}>
-						<StopButton />
-					</button>
-
-					<button class="btn btn-sm btn-ghost" on:click={menuClickHnadler}>
-						<MenuButton />
-					</button>
-				</div>
-			</div>
 		</div>
-		<div class="drawer-side h-12">
-			<label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label>
-			<div class=" w-screen bg-base-100 h-full text-base-content flex fles-1">
-				<MainMenu closeDrawer={toggleDrawer} />
-			</div>
+	</div>
+	<div class="drawer-side h-12">
+		<label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label>
+		<div class=" w-screen bg-base-100 h-full text-base-content flex fles-1">
+			<MainMenu closeDrawer={toggleDrawer} />
 		</div>
-	</main>
-{/if}
+	</div>
+</main>
 
 <svelte:window on:keydown={onkeydown} />
 
