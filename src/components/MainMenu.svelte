@@ -43,7 +43,9 @@
 	async function settingsClickHandler() {
 		const settingsWindow = new WebviewWindow('settings', {
 			url: '/settings',
-			title: 'Settings'
+			title: 'Settings',
+			decorations: false,
+			transparent: true
 		});
 	}
 </script>

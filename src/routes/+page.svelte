@@ -19,6 +19,7 @@
 	import { listen } from '@tauri-apps/api/event';
 
 	const INTERVAL = 1000 * 60;
+	// const INTERVAL = 100;
 
 	const isLoadedConfig = writable(false);
 	let workTime = $settingsStore.timeDuration as number;
@@ -31,7 +32,6 @@
 		autoStartSessions = $settingsStore.autoStartSessions as number;
 		console.log('Loaded Configs');
 	}
-	// const INTERVAL = 100;
 
 	let intervalId: number | undefined = undefined;
 	const time = writable($settingsStore.timeDuration as number);
@@ -234,8 +234,6 @@
 			</div>
 		</div>
 	</main>
-{:else}
-	<div class="flex justify-center items-center h-screen"></div>
 {/if}
 
 <svelte:window on:keydown={onkeydown} />
