@@ -30,7 +30,6 @@
 		workTime = $settingsStore.timeDuration as number;
 		breakTime = $settingsStore.breakDuration as number;
 		autoStartSessions = $settingsStore.autoStartSessions as number;
-		console.log('Loaded Configs');
 	}
 
 	let intervalId: number | undefined = undefined;
