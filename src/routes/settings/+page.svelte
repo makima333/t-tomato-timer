@@ -1,17 +1,19 @@
 <script lang="ts">
-	import settingsStore from '$lib/Settings';
+	import { settingsStore } from '$lib/Settings';
 	import { emit } from '@tauri-apps/api/event';
-
-	let timeDuration = $settingsStore.timeDuration;
-	let breakDuration = $settingsStore.breakDuration;
-	let autoStartSessions = $settingsStore.autoStartSessions;
+	import { onMount } from 'svelte';
+	import { loadSettings, updateSettings } from '$lib/Settings';
 
 	async function save() {
-		$settingsStore.timeDuration = timeDuration;
-		$settingsStore.breakDuration = breakDuration;
-		$settingsStore.autoStartSessions = autoStartSessions;
+		updateSettings('timeDuration', $settingsStore.timeDuration);
+		updateSettings('breakDuration', $settingsStore.breakDuration);
+		updateSettings('autoStartSessions', $settingsStore.autoStartSessions);
 		emit('settings-changed', { $settingsStore });
 	}
+
+	onMount(async () => {
+		await loadSettings();
+	});
 </script>
 
 <main>
@@ -19,19 +21,19 @@
 		<div class="p-4">
 			Time Duration (minutes)
 			<label class="input input-bordered flex items-center gap-4">
-				<input type="number" class="grow" bind:value={timeDuration} />
+				<input type="number" class="grow" bind:value={$settingsStore.timeDuration} />
 			</label>
 		</div>
 		<div class="p-4">
 			Break Duration (minutes)
 			<label class="input input-bordered flex items-center gap-4">
-				<input type="number" class="grow" bind:value={breakDuration} />
+				<input type="number" class="grow" bind:value={$settingsStore.breakDuration} />
 			</label>
 		</div>
 		<div class="p-4">
 			Auto Start Sessions
 			<label class="input input-bordered flex items-center gap-4">
-				<input type="number" class="grow" bind:value={autoStartSessions} />
+				<input type="number" class="grow" bind:value={$settingsStore.autoStartSessions} />
 			</label>
 		</div>
 	</div>

@@ -8,7 +8,7 @@
 	import { AudioPlayer } from '$lib/AudioPlay';
 	import { WithBlur } from '$lib/WithBlur';
 	import { SetAlwaysOnTopOn } from '$lib/WindowApi';
-	import settingsStore, { loadSettings } from '$lib/Settings';
+	import { settingsStore, loadSettings } from '$lib/Settings';
 
 	import CloseButton from '../icons/Close.svelte';
 	import PlayButton from '../icons/Play.svelte';
@@ -18,12 +18,21 @@
 	import AlertWav from '../assets/alert.wav';
 	import { listen } from '@tauri-apps/api/event';
 
-	const WORKTIME = $settingsStore.timeDuration as number;
-	const BREAKTIME = $settingsStore.breakDuration as number;
 	const INTERVAL = 1000 * 60;
+
+	const isLoadedConfig = writable(false);
+	let workTime = $settingsStore.timeDuration as number;
+	let breakTime = $settingsStore.breakDuration as number;
+	let autoStartSessions = $settingsStore.autoStartSessions as number;
+
+	$: if ($isLoadedConfig === true) {
+		workTime = $settingsStore.timeDuration as number;
+		breakTime = $settingsStore.breakDuration as number;
+		autoStartSessions = $settingsStore.autoStartSessions as number;
+		console.log('Loaded Configs');
+	}
 	// const INTERVAL = 100;
 
-	let autoStartSessions = $settingsStore.autoStartSessions as number;
 	let intervalId: number | undefined = undefined;
 	const time = writable($settingsStore.timeDuration as number);
 	const playPauseToggle = writable(true);
@@ -60,16 +69,16 @@
 					if ($workBreakToggle) {
 						workBreakToggle.set(false);
 						isFinished = true;
-						return BREAKTIME;
+						return breakTime;
 					}
 					workBreakToggle.set(true);
 					isFinished = true;
-					return WORKTIME;
+					return workTime;
 				}
 				return n - 1;
 			});
 			if (isFinished && autoStartSessions > 0) {
-				if (get(time) === WORKTIME) {
+				if (get(time) === workTime) {
 					autoStartSessions--;
 				}
 				if (autoStartSessions > 0) {
@@ -99,7 +108,7 @@
 	function stopTimer() {
 		clearInterval(intervalId);
 		intervalId = undefined;
-		time.set(WORKTIME);
+		time.set(workTime);
 		playPauseToggle.set(true);
 		workBreakToggle.set(true);
 		autoStartSessions = $settingsStore.autoStartSessions as number;
@@ -113,7 +122,7 @@
 		appWindow.close();
 	}
 
-	let worktimes = Array.from({ length: WORKTIME }, (_, i) => i + 1);
+	let worktimes = Array.from({ length: $settingsStore.timeDuration as number }, (_, i) => i + 1);
 
 	time.subscribe((value) => {
 		worktimes = Array.from({ length: value }, (_, i) => i + 1);
@@ -146,16 +155,18 @@
 		}
 	}
 
-	$: appWindow.setSize(new LogicalSize(300 + WORKTIME * 10, 50));
+	$: appWindow.setSize(new LogicalSize(300 + ($settingsStore.timeDuration as number) * 10, 50));
 
 	const playPauseClickHandler = WithBlur(toggleTimer);
 	const stopClickHandler = WithBlur(stopTimer);
 	const menuClickHnadler = WithBlur(toggleDrawer);
 
-	onMount(() => {
+	onMount(async () => {
+		await loadSettings();
+		isLoadedConfig.set(true);
 		listen('settings-changed', async (event) => {
 			stopTimer();
-			$settingsStore = await loadSettings();
+			await loadSettings();
 		});
 	});
 
@@ -164,61 +175,68 @@
 	});
 </script>
 
-<main class="drawer drawer-end bg-base-100 rounded-lg">
-	<input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
-	<div class="drawer-content">
-		<div data-tauri-drag-region class="titlebar h-4 bg-slate-400 flex justify-between rounded-t-lg">
-			<div></div>
-			<button on:click={closeWindow} class="mr-2">
-				<CloseButton />
-			</button>
-		</div>
-		<div class="ml-4 flex flex-1 justify-between">
-			<ul class="timeline">
-				{#each worktimes as { }}
-					<li>
-						<div class="timeline-middle">
-							{#if $workBreakToggle === true}
-								<div class={`w-1.5 h-3 mr-1 rounded-sm bg-info outline outline-1`}></div>
-							{:else}
-								<div class={`w-2 h-6 mr-1 rounded-sm bg-success outline outline-1`}></div>
-							{/if}
-						</div>
-					</li>
-				{/each}
-			</ul>
-			<div class="flex items-center justify-center">
-				<div class="flex items-center justify-center mr-1" transition:fade>
-					{#if $time < 10}
-						0{$time}
-					{:else}
-						{$time}
-					{/if}m
-				</div>
-				<button class="btn btn-sm btn-ghost mr-1" on:click={playPauseClickHandler}>
-					{#if $playPauseToggle}
-						<PlayButton />
-					{:else}
-						<PauseButton />
-					{/if}
-				</button>
-				<button class="btn btn-sm btn-ghost mr-1" on:click={stopClickHandler}>
-					<StopButton />
-				</button>
-
-				<button class="btn btn-sm btn-ghost" on:click={menuClickHnadler}>
-					<MenuButton />
+{#if $isLoadedConfig}
+	<main class="drawer drawer-end bg-base-100 rounded-lg">
+		<input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
+		<div class="drawer-content">
+			<div
+				data-tauri-drag-region
+				class="titlebar h-4 bg-slate-400 flex justify-between rounded-t-lg"
+			>
+				<div></div>
+				<button on:click={closeWindow} class="mr-2">
+					<CloseButton />
 				</button>
 			</div>
+			<div class="ml-4 flex flex-1 justify-between">
+				<ul class="timeline">
+					{#each worktimes as { }}
+						<li>
+							<div class="timeline-middle">
+								{#if $workBreakToggle === true}
+									<div class={`w-1.5 h-3 mr-1 rounded-sm bg-info outline outline-1`}></div>
+								{:else}
+									<div class={`w-2 h-6 mr-1 rounded-sm bg-success outline outline-1`}></div>
+								{/if}
+							</div>
+						</li>
+					{/each}
+				</ul>
+				<div class="flex items-center justify-center">
+					<div class="flex items-center justify-center mr-1" transition:fade>
+						{#if $time < 10}
+							0{$time}
+						{:else}
+							{$time}
+						{/if}m
+					</div>
+					<button class="btn btn-sm btn-ghost mr-1" on:click={playPauseClickHandler}>
+						{#if $playPauseToggle}
+							<PlayButton />
+						{:else}
+							<PauseButton />
+						{/if}
+					</button>
+					<button class="btn btn-sm btn-ghost mr-1" on:click={stopClickHandler}>
+						<StopButton />
+					</button>
+
+					<button class="btn btn-sm btn-ghost" on:click={menuClickHnadler}>
+						<MenuButton />
+					</button>
+				</div>
+			</div>
 		</div>
-	</div>
-	<div class="drawer-side h-12">
-		<label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label>
-		<div class=" w-screen bg-base-100 h-full text-base-content flex fles-1">
-			<MainMenu closeDrawer={toggleDrawer} />
+		<div class="drawer-side h-12">
+			<label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label>
+			<div class=" w-screen bg-base-100 h-full text-base-content flex fles-1">
+				<MainMenu closeDrawer={toggleDrawer} />
+			</div>
 		</div>
-	</div>
-</main>
+	</main>
+{:else}
+	<div class="flex justify-center items-center h-screen"></div>
+{/if}
 
 <svelte:window on:keydown={onkeydown} />
 

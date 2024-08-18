@@ -8,7 +8,7 @@
 	import { SetSoundOn, SetSoundOff } from '$lib/SoundToggle';
 	import { AudioPlayer } from '$lib/AudioPlay';
 	import { WithBlur } from '$lib/WithBlur';
-	import settingsStore from '$lib/Settings';
+	import { settingsStore } from '$lib/Settings';
 
 	import AlwaysOnTop from '../icons/AlwaysOnTop.svelte';
 	import CloseMenu from '../icons/CloseMenu.svelte';

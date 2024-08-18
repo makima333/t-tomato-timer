@@ -1,8 +1,17 @@
 import { readTextFile, writeTextFile, BaseDirectory } from '@tauri-apps/api/fs';
-import { writable } from 'svelte/store';
+import { writable, get } from 'svelte/store';
 
-const FILENAME = 'config.json';
-const defaultSettings = {
+type SettingsType = {
+	autoStartSessions: number;
+	alertSound: boolean;
+	alwaysOnTop: boolean;
+	timeDuration: number;
+	breakDuration: number;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	[key: string]: any;
+};
+
+const defaultSettings: SettingsType = {
 	autoStartSessions: 3,
 	alertSound: true,
 	alwaysOnTop: false,
@@ -10,17 +19,20 @@ const defaultSettings = {
 	breakDuration: 5
 };
 
+const FILENAME = 'config.json';
+export const settingsStore = writable(defaultSettings);
+
 export async function loadSettings() {
 	try {
 		const config = await readTextFile(FILENAME, { dir: BaseDirectory.AppConfig });
-		return JSON.parse(config);
+		settingsStore.set(JSON.parse(config));
 	} catch (error) {
 		return defaultSettings;
 	}
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function saveSettings(settings: Record<string, any>) {
+export async function saveSettings(settings: Record<string, any>) {
 	try {
 		await writeTextFile(FILENAME, JSON.stringify(settings), { dir: BaseDirectory.AppConfig });
 	} catch (error) {
@@ -33,12 +45,5 @@ export function updateSettings(key: string, value: unknown) {
 		settings[key] = value;
 		return settings;
 	});
+	saveSettings(get(settingsStore));
 }
-
-const initialSettings = await loadSettings();
-const settingsStore = writable(initialSettings);
-settingsStore.subscribe((value) => {
-	saveSettings(value);
-});
-
-export default settingsStore;
