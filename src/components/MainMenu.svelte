@@ -1,7 +1,7 @@
 <script lang="ts">
 	export let closeDrawer = () => {};
 
-	import { WebviewWindow } from '@tauri-apps/api/window';
+	import { WebviewWindow, LogicalSize } from '@tauri-apps/api/window';
 	import { appWindow } from '@tauri-apps/api/window';
 
 	import { SetAlwaysOnTopOn, SetAlwaysOnTopOff } from '$lib/WindowApi';
@@ -44,8 +44,14 @@
 		const settingsWindow = new WebviewWindow('settings', {
 			url: '/settings',
 			title: 'Settings',
+			height: 400,
+			width: 400,
 			decorations: false,
 			transparent: true
+		});
+		settingsWindow.once('tauri://created', async function () {
+			await settingsWindow.setDecorations(true);
+			await settingsWindow.setSize(new LogicalSize(400, 450));
 		});
 	}
 </script>
