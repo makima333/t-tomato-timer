@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
 	import { onDestroy, onMount } from 'svelte';
-	import { writable, get, derived } from 'svelte/store';
+	import { writable, get } from 'svelte/store';
 	import { appWindow, LogicalSize } from '@tauri-apps/api/window';
 
 	import MainMenu from '../components/MainMenu.svelte';
@@ -9,6 +9,7 @@
 	import { WithBlur } from '$lib/WithBlur';
 	import { SetAlwaysOnTopOn } from '$lib/WindowApi';
 	import { settingsStore, loadSettings } from '$lib/Settings';
+	import { setTaskWindowLancher } from '$lib/WindowLancher';
 
 	import CloseButton from '../icons/Close.svelte';
 	import PlayButton from '../icons/Play.svelte';
@@ -39,8 +40,8 @@
 	const audioPlayer = new AudioPlayer(AlertWav, 2);
 
 	$: time.update(() => $settingsStore.timeDuration as number);
-	$: isSoundOn = $settingsStore['alertSound'] as boolean;
-	$: if ($settingsStore['alwaysOnTop']) {
+	$: isSoundOn = $settingsStore.alertSound as boolean;
+	$: if ($settingsStore.alwaysOnTop) {
 		SetAlwaysOnTopOn();
 	}
 
@@ -149,12 +150,13 @@
 				stopTimer();
 				break;
 			case event.ctrlKey && shortCutKeys.keyT:
+				setTaskWindowLancher();
 				console.log('Ctrl + key');
 				break;
 		}
 	}
 
-	$: appWindow.setSize(new LogicalSize(300 + ($settingsStore.timeDuration as number) * 10, 50));
+	$: appWindow.setSize(new LogicalSize(300 + ($settingsStore.timeDuration as number) * 10, 60));
 
 	const playPauseClickHandler = WithBlur(toggleTimer);
 	const stopClickHandler = WithBlur(stopTimer);
@@ -177,8 +179,16 @@
 <main class="drawer drawer-end bg-base-100 rounded-lg">
 	<input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
 	<div class="drawer-content">
-		<div data-tauri-drag-region class="titlebar h-4 bg-slate-400 flex justify-between rounded-t-lg">
-			<div></div>
+		<div data-tauri-drag-region class="titlebar h-5 bg-slate-400 flex justify-between rounded-t-lg">
+			<div data-tauri-drag-region class="text-black pl-2 text-sm">
+				<span
+					data-tauri-drag-region
+					class="badge badge-xs badge-ghost text-black bg-inherit border-transparent z-50"
+					style="cursor: default;"
+				>
+					Work Name
+				</span>
+			</div>
 			<button on:click={closeWindow} class="mr-2">
 				<CloseButton />
 			</button>

@@ -67,7 +67,7 @@
     "windows": [
       {
         "fullscreen": false,
-        "height": 50,
+        "height": 60,
         "resizable": true,
         "title": "tttimer",
         "width": 500,
