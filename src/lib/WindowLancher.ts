@@ -1,4 +1,4 @@
-import { WebviewWindow, LogicalSize } from '@tauri-apps/api/window';
+import { WebviewWindow } from '@tauri-apps/api/window';
 
 export async function setTaskWindowLancher() {
 	const setTaskWindow = new WebviewWindow('setTask', {

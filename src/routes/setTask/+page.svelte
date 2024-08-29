@@ -1,6 +1,17 @@
 <script>
-	import { appWindow, LogicalSize } from '@tauri-apps/api/window';
+	import { appWindow } from '@tauri-apps/api/window';
 	import { onMount } from 'svelte';
+	import Svelecte from 'svelecte';
+
+	const list = [
+		{ id: 1, name: 'Item 1' },
+		{ id: 2, name: 'Item 2' }
+	];
+
+	/**
+	 * @type {null}
+	 */
+	let myValue = null;
 	/**
 	 * @param {{ key: string; }} event
 	 */
@@ -8,24 +19,30 @@
 		if (event.key === 'Escape') {
 			appWindow.close();
 		}
+		if (event.key === 'Enter') {
+			console.log(myValue);
+		}
 	}
 
 	// focus on input field
 	onMount(async () => {
 		await appWindow.setFocus();
-		console.log('focus');
-		console.log(document.getElementById('inputTask'));
 		document.getElementById('inputTask')?.focus();
+		// add css class to inputTask
+		document.getElementById('inputTask')?.classList.add('text-gray-700');
+		document.getElementsByClassName('sv-control')[0].classList.add('h-16');
 	});
 </script>
 
-<main class="bg-gray-100 rounded-lg">
-	<input
+<main class="rounded-lg">
+	<!-- <input
 		id="inputTask"
 		type="text"
 		placeholder="Type task"
-		class="input w-full text-gray-700 bg-inherit"
-	/>
+		class="input w-full  bg-inherit"
+	/> -->
+	<Svelecte inputId="inputTask" bind:value={myValue} placeholder="Type task" options={list} class=""
+	></Svelecte>
 </main>
 
 <svelte:window on:keydown={onKeyDown} />
