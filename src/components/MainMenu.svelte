@@ -42,7 +42,7 @@
 
 	async function settingsClickHandler() {
 		const settingsWindow = new WebviewWindow('settings', {
-			url: '/settings',
+			url: 'settings',
 			title: 'Settings',
 			height: 400,
 			width: 400,
