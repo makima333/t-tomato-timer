@@ -1,4 +1,4 @@
-import { readTextFile, writeTextFile, BaseDirectory } from '@tauri-apps/api/fs';
+import { readTextFile, writeTextFile, BaseDirectory } from '@tauri-apps/plugin-fs';
 import { writable, derived } from 'svelte/store';
 
 const FILENAME = 'config.json';

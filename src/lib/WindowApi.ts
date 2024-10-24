@@ -1,6 +1,7 @@
-import { appWindow } from '@tauri-apps/api/window';
+import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 
 import { UpdateSetting } from './Settings';
+const appWindow = getCurrentWebviewWindow()
 
 export function SetAlwaysOnTopOn() {
 	appWindow.setAlwaysOnTop(true);

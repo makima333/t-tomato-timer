@@ -2,7 +2,7 @@
 	import { onDestroy } from 'svelte';
 	import { writable } from 'svelte/store';
 	import { fade } from 'svelte/transition';
-	import { appWindow } from '@tauri-apps/api/window';
+	import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 
 	import MainMenu from '../components/MainMenu.svelte';
 	import { AudioPlayer } from '$lib/AudioPlay';
@@ -15,6 +15,7 @@
 	import AlertWav from '../assets/alert.wav';
 	import { initializeSettings, isAlwaysOnTop, isSoundOn } from '$lib/Settings';
 	import { SetAlwaysOnTopOn } from '$lib/WindowApi';
+const appWindow = getCurrentWebviewWindow()
 
 	const WORKTIME = 25;
 	const BREAKTIME = 5;

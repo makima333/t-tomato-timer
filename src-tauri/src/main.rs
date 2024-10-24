@@ -2,8 +2,11 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 use std::error::Error;
 
+use tauri::Manager;
+
 fn app_startup(app: &mut tauri::App) -> Result<(), Box<dyn Error>> {
-    let app_dir_option = app.path_resolver().app_config_dir();
+    let app_dir_option = app.path().app_config_dir()?;
+
     const CONFIG: &str = include_str!("./config_template.json");
     match app_dir_option {
         Some(app_dir) => {
@@ -24,6 +27,7 @@ fn app_startup(app: &mut tauri::App) -> Result<(), Box<dyn Error>> {
 
 fn main() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_window_state::Builder::default().build())
         .setup(app_startup)
         .invoke_handler(tauri::generate_handler![greet])
