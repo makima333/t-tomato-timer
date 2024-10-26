@@ -5,22 +5,23 @@ use std::error::Error;
 use tauri::Manager;
 
 fn app_startup(app: &mut tauri::App) -> Result<(), Box<dyn Error>> {
-    let app_dir_option = app.path().app_config_dir()?;
-
+    let app_dir_option = match app.path().app_config_dir() {
+        Ok(app_dir) => app_dir,
+        Err(e) => {
+            eprintln!("Failed to get app directory: {}", e);
+           return Err("Failed to get app directory".into());
+        }
+    };
+    
     const CONFIG: &str = include_str!("./config_template.json");
-    match app_dir_option {
-        Some(app_dir) => {
-            if !app_dir.exists() {
-                std::fs::create_dir_all(&app_dir).expect("Failed to create app directory");
-            }
-            let config_file_path = app_dir.join("config.json");
-            if !config_file_path.exists() {
-                std::fs::write(&config_file_path, CONFIG).expect("Failed to create config file");
-            }
-        }
-        None => {
-            return Err("Failed to get app directory".into());
-        }
+    if !app_dir_option.exists() {
+        // create the app directory
+        std::fs::create_dir_all(&app_dir_option).expect("Failed to create app directory");
+    }
+    let config_file_path = app_dir_option.join("config.json");
+    if !config_file_path.exists() {
+        // create the config file
+        std::fs::write(&config_file_path, CONFIG).expect("Failed to create config file");
     }
     Ok(())
 }
