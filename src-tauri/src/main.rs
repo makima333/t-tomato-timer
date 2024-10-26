@@ -24,6 +24,7 @@ fn app_startup(app: &mut tauri::App) -> Result<(), Box<dyn Error>> {
 
 fn main() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_window_state::Builder::default().build())
         .setup(app_startup)
         .invoke_handler(tauri::generate_handler![greet])

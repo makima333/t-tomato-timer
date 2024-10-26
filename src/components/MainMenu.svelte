@@ -1,8 +1,8 @@
 <script lang="ts">
 	export let closeDrawer = () => {};
 
-	import { WebviewWindow, LogicalSize } from '@tauri-apps/api/window';
-	import { appWindow } from '@tauri-apps/api/window';
+	import { WebviewWindow, LogicalSize } from '@tauri-apps/api/webviewWindow';
+	import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 
 	import { SetAlwaysOnTopOn, SetAlwaysOnTopOff } from '$lib/WindowApi';
 	import { SetSoundOn, SetSoundOff } from '$lib/SoundToggle';
@@ -16,6 +16,7 @@
 	import SoundOn from '../icons/SoundOn.svelte';
 	import SoundOff from '../icons/SoundOff.svelte';
 	import AlertWav from '../assets/alert.wav';
+const appWindow = getCurrentWebviewWindow()
 
 	let audioPlayer = new AudioPlayer(AlertWav, 1);
 

@@ -1,7 +1,8 @@
 <script>
-	import { appWindow } from '@tauri-apps/api/window';
+	import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 	import { onMount } from 'svelte';
 	import Svelecte from 'svelecte';
+const appWindow = getCurrentWebviewWindow()
 
 	const list = [
 		{ id: 1, name: 'Item 1' },

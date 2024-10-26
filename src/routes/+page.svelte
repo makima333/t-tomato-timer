@@ -2,7 +2,7 @@
 	import { fade } from 'svelte/transition';
 	import { onDestroy, onMount } from 'svelte';
 	import { writable, get } from 'svelte/store';
-	import { appWindow, LogicalSize } from '@tauri-apps/api/window';
+	import { getCurrentWebviewWindow, LogicalSize } from '@tauri-apps/api/webviewWindow';
 
 	import MainMenu from '../components/MainMenu.svelte';
 	import { AudioPlayer } from '$lib/AudioPlay';
@@ -18,6 +18,7 @@
 	import MenuButton from '../icons/Menu.svelte';
 	import AlertWav from '../assets/alert.wav';
 	import { listen } from '@tauri-apps/api/event';
+const appWindow = getCurrentWebviewWindow()
 
 	const INTERVAL = 1000 * 60;
 	// const INTERVAL = 100;
