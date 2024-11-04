@@ -1,8 +1,9 @@
 <script lang="ts">
 	export let closeDrawer = () => {};
 
-	import { WebviewWindow, LogicalSize } from '@tauri-apps/api/webviewWindow';
+	import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
 	import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
+	import { LogicalSize } from '@tauri-apps/api/dpi';
 
 	import { SetAlwaysOnTopOn, SetAlwaysOnTopOff } from '$lib/WindowApi';
 	import { SetSoundOn, SetSoundOff } from '$lib/SoundToggle';
@@ -16,7 +17,7 @@
 	import SoundOn from '../icons/SoundOn.svelte';
 	import SoundOff from '../icons/SoundOff.svelte';
 	import AlertWav from '../assets/alert.wav';
-const appWindow = getCurrentWebviewWindow()
+	const appWindow = getCurrentWebviewWindow()
 
 	let audioPlayer = new AudioPlayer(AlertWav, 1);
 
@@ -48,16 +49,20 @@ const appWindow = getCurrentWebviewWindow()
 			height: 400,
 			width: 400,
 			decorations: false,
-			transparent: true
+			transparent: true,
+			visible: false,
 		});
 		settingsWindow.once('tauri://created', async function () {
+			// delay 100ms
+			await new Promise((resolve) => setTimeout(resolve, 100));
 			await settingsWindow.setDecorations(true);
 			await settingsWindow.setSize(new LogicalSize(400, 450));
+			await settingsWindow.show();
 		});
 	}
 </script>
 
-<div class="flex items-center justify-center space-x-1">
+<div class="flex items-center justify-center space-x-1 mx-4">
 	<button class="btn btn-ghost btn-square" on:click={WithBlur(closeDrawer)}>
 		<CloseMenu />
 	</button>

@@ -1,14 +1,15 @@
-import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
+import { WebviewWindow, getAllWebviewWindows } from '@tauri-apps/api/webviewWindow';
 
 export async function setTaskWindowLancher() {
 	const setTaskWindow = new WebviewWindow('setTask', {
 		url: '/setTask',
 		title: 'Set Task',
-		height: 500,
+		height: 200,
 		width: 400,
 		decorations: false,
 		transparent: true,
 		resizable: false,
+		shadow: false,
 		center: true
 	});
 	setTaskWindow.once('tauri://created', async function () {

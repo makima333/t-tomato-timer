@@ -2,7 +2,8 @@
 	import { fade } from 'svelte/transition';
 	import { onDestroy, onMount } from 'svelte';
 	import { writable, get } from 'svelte/store';
-	import { getCurrentWebviewWindow, LogicalSize } from '@tauri-apps/api/webviewWindow';
+	import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
+	import { LogicalSize } from '@tauri-apps/api/dpi';
 
 	import MainMenu from '../components/MainMenu.svelte';
 	import { AudioPlayer } from '$lib/AudioPlay';
@@ -18,7 +19,7 @@
 	import MenuButton from '../icons/Menu.svelte';
 	import AlertWav from '../assets/alert.wav';
 	import { listen } from '@tauri-apps/api/event';
-const appWindow = getCurrentWebviewWindow()
+	const appWindow = getCurrentWebviewWindow()
 
 	const INTERVAL = 1000 * 60;
 	// const INTERVAL = 100;
@@ -152,12 +153,11 @@ const appWindow = getCurrentWebviewWindow()
 				break;
 			case event.ctrlKey && shortCutKeys.keyT:
 				setTaskWindowLancher();
-				console.log('Ctrl + key');
 				break;
 		}
 	}
 
-	$: appWindow.setSize(new LogicalSize(300 + ($settingsStore.timeDuration as number) * 10, 60));
+	$: appWindow.setSize(new LogicalSize(300 + ($settingsStore.timeDuration as number) * 10, 55));
 
 	const playPauseClickHandler = WithBlur(toggleTimer);
 	const stopClickHandler = WithBlur(stopTimer);
@@ -180,7 +180,7 @@ const appWindow = getCurrentWebviewWindow()
 <main class="drawer drawer-end bg-base-100 rounded-lg">
 	<input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
 	<div class="drawer-content">
-		<div data-tauri-drag-region class="titlebar h-5 bg-slate-400 flex justify-between rounded-t-lg">
+		<div data-tauri-drag-region class="titlebar h-5 bg-slate-200 flex justify-between rounded-t-lg">
 			<div data-tauri-drag-region class="text-black pl-2 text-sm">
 				<span
 					data-tauri-drag-region
@@ -233,9 +233,9 @@ const appWindow = getCurrentWebviewWindow()
 			</div>
 		</div>
 	</div>
-	<div class="drawer-side h-12">
+	<div class="drawer-side">
 		<label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label>
-		<div class=" w-screen bg-base-100 h-full text-base-content flex fles-1">
+		<div class="w-full bg-base-100 min-h-full text-base-content flex">
 			<MainMenu closeDrawer={toggleDrawer} />
 		</div>
 	</div>

@@ -2,7 +2,7 @@
 	import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 	import { onMount } from 'svelte';
 	import Svelecte from 'svelecte';
-const appWindow = getCurrentWebviewWindow()
+	const appWindow = getCurrentWebviewWindow()
 
 	const list = [
 		{ id: 1, name: 'Item 1' },
@@ -24,14 +24,14 @@ const appWindow = getCurrentWebviewWindow()
 			console.log(myValue);
 		}
 	}
+	// location.reload();
 
 	// focus on input field
 	onMount(async () => {
-		await appWindow.setFocus();
+		// tmp fix for focus issue
+		await getCurrentWebviewWindow().hide();
+		await getCurrentWebviewWindow().show();
 		document.getElementById('inputTask')?.focus();
-		// add css class to inputTask
-		document.getElementById('inputTask')?.classList.add('text-gray-700');
-		document.getElementsByClassName('sv-control')[0].classList.add('h-16');
 	});
 </script>
 
@@ -42,7 +42,11 @@ const appWindow = getCurrentWebviewWindow()
 		placeholder="Type task"
 		class="input w-full  bg-inherit"
 	/> -->
-	<Svelecte inputId="inputTask" bind:value={myValue} placeholder="Type task" options={list} class=""
+	<Svelecte 
+		inputId="inputTask"
+		 bind:value={myValue} 
+		 placeholder="Type task" 
+		 options={list} 
 	></Svelecte>
 </main>
 

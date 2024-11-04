@@ -47,9 +47,10 @@
   "app": {
     "windows": [
       {
+        "label": "tttimer",
         "fullscreen": false,
-        "height": 60,
-        "resizable": true,
+        "height": 55         ,
+        "resizable": false,
         "title": "tttimer",
         "width": 500,
         "decorations": false,
@@ -57,7 +58,10 @@
       }
     ],
     "security": {
-      "csp": null
+      "csp": null,
+      "capabilities": [
+        "migrated"
+      ]
     }
   }
 }

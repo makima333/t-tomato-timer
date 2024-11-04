@@ -24,7 +24,7 @@ export const settingsStore = writable(defaultSettings);
 
 export async function loadSettings() {
 	try {
-		const config = await readTextFile(FILENAME, { dir: BaseDirectory.AppConfig });
+		const config = await readTextFile(FILENAME, { baseDir: BaseDirectory.AppConfig });
 		settingsStore.set(JSON.parse(config));
 	} catch (error) {
 		return defaultSettings;
@@ -34,7 +34,7 @@ export async function loadSettings() {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function saveSettings(settings: Record<string, any>) {
 	try {
-		await writeTextFile(FILENAME, JSON.stringify(settings), { dir: BaseDirectory.AppConfig });
+		await writeTextFile(FILENAME, JSON.stringify(settings), { baseDir: BaseDirectory.AppConfig });
 	} catch (error) {
 		console.error(error);
 	}
