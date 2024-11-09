@@ -6,7 +6,7 @@ use tauri::Manager;
 
 fn app_startup(app: &mut tauri::App) -> Result<(), Box<dyn Error>> {
     // This is the default config that will be written to the config file if it doesn't exist
-    const CONFIG: &str = include_str!("./config_template.json"); 
+    const CONFIG: &str = include_str!("./config_template.json");
 
     let app_dir_option = match app.path().app_config_dir() {
         Ok(app_dir) => app_dir,
@@ -29,7 +29,7 @@ fn app_startup(app: &mut tauri::App) -> Result<(), Box<dyn Error>> {
 fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_fs::init())
-        // .plugin(tauri_plugin_window_state::Builder::default().build())
+        .plugin(tauri_plugin_window_state::Builder::default().build())
         .setup(app_startup)
         .invoke_handler(tauri::generate_handler![greet])
         .run(tauri::generate_context!())

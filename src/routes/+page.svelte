@@ -19,7 +19,7 @@
 	import MenuButton from '../icons/Menu.svelte';
 	import AlertWav from '../assets/alert.wav';
 	import { listen } from '@tauri-apps/api/event';
-	const appWindow = getCurrentWebviewWindow()
+	const appWindow = getCurrentWebviewWindow();
 
 	const INTERVAL = 1000 * 60;
 	// const INTERVAL = 100;
@@ -164,6 +164,7 @@
 	const menuClickHnadler = WithBlur(toggleDrawer);
 
 	onMount(async () => {
+		await getCurrentWebviewWindow().setShadow(false);
 		await loadSettings();
 		isLoadedConfig.set(true);
 		listen('settings-changed', async (event) => {
@@ -177,7 +178,7 @@
 	});
 </script>
 
-<main class="drawer drawer-end bg-base-100 rounded-lg">
+<main class="drawer drawer-end bg-white rounded-lg">
 	<input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
 	<div class="drawer-content">
 		<div data-tauri-drag-region class="titlebar h-5 bg-slate-200 flex justify-between rounded-t-lg">

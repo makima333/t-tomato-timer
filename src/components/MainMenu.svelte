@@ -17,7 +17,7 @@
 	import SoundOn from '../icons/SoundOn.svelte';
 	import SoundOff from '../icons/SoundOff.svelte';
 	import AlertWav from '../assets/alert.wav';
-	const appWindow = getCurrentWebviewWindow()
+	const appWindow = getCurrentWebviewWindow();
 
 	let audioPlayer = new AudioPlayer(AlertWav, 1);
 
@@ -48,16 +48,13 @@
 			title: 'Settings',
 			height: 400,
 			width: 400,
-			decorations: false,
 			transparent: true,
-			visible: false,
+			visible: false
 		});
 		settingsWindow.once('tauri://created', async function () {
 			// delay 100ms
-			await new Promise((resolve) => setTimeout(resolve, 100));
-			await settingsWindow.setDecorations(true);
+			await new Promise((resolve) => setTimeout(resolve, 500));
 			await settingsWindow.setSize(new LogicalSize(400, 450));
-			await settingsWindow.show();
 		});
 	}
 </script>
