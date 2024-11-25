@@ -178,7 +178,7 @@
 	});
 </script>
 
-<main class="drawer drawer-end bg-white rounded-lg">
+<main class="drawer drawer-end bg-slate-50 rounded-lg">
 	<input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
 	<div class="drawer-content">
 		<div data-tauri-drag-region class="titlebar h-5 bg-slate-200 flex justify-between rounded-t-lg">
@@ -195,7 +195,7 @@
 				<CloseButton />
 			</button>
 		</div>
-		<div class="ml-4 flex flex-1 justify-between">
+		<div class="ml-4 flex flex-1 justify-between text-slate-500">
 			<ul class="timeline">
 				{#each worktimes as { }}
 					<li>

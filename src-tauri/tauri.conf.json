@@ -43,7 +43,11 @@
   "mainBinaryName": "tttimer",
   "version": "0.2.0",
   "identifier": "tttimer",
-  "plugins": {},
+  "plugins": {
+    "sql": {
+      "preload": ["sqlite:mydatabase.db"]
+    }
+  },
   "app": {
     "windows": [
       {
@@ -54,7 +58,8 @@
         "title": "tttimer",
         "width": 500,
         "decorations": false,
-        "transparent": true
+        "transparent": true,
+        "visible": false
       }
     ],
     "security": {
