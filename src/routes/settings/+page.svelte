@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 	import { settingsStore } from '$lib/Settings';
 	import { emit } from '@tauri-apps/api/event';
 	import { onMount } from 'svelte';

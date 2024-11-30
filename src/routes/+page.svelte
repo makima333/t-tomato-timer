@@ -164,6 +164,7 @@
 	const menuClickHnadler = WithBlur(toggleDrawer);
 
 	onMount(async () => {
+		await getCurrentWebviewWindow().show();
 		await getCurrentWebviewWindow().setShadow(false);
 		await loadSettings();
 		isLoadedConfig.set(true);

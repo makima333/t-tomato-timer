@@ -42,18 +42,35 @@
 		}
 	}
 
-	async function settingsClickHandler() {
+	const clickSettingsHandler = WithBlur(lauchSettingsWindow)
+
+	async function lauchSettingsWindow() {
 		const settingsWindow = new WebviewWindow('settings', {
 			url: '/settings',
 			title: 'Settings',
 			height: 400,
 			width: 400,
-			transparent: true,
-			visible: false
+			visible: false,
 		});
 		settingsWindow.once('tauri://created', async function () {
-			// delay 100ms
+			// delay 500ms
 			await new Promise((resolve) => setTimeout(resolve, 500));
+			await settingsWindow.show();
+			await settingsWindow.setSize(new LogicalSize(400, 450));
+		});
+	}
+	async function lauchTaskWindow() {
+		const settingsWindow = new WebviewWindow('task', {
+			url: '/task',
+			title: 'task',
+			height: 450,
+			width: 400,
+			visible: false,
+		});
+		settingsWindow.once('tauri://created', async function () {
+			// delay 500ms
+			await new Promise((resolve) => setTimeout(resolve, 500));
+			await settingsWindow.show();
 			await settingsWindow.setSize(new LogicalSize(400, 450));
 		});
 	}
@@ -63,17 +80,20 @@
 	<button class="btn btn-ghost btn-square" on:click={WithBlur(closeDrawer)}>
 		<CloseMenu />
 	</button>
-	<button class="btn" on:click={toggleAlwaysOnTop}>
+	<button class="btn" on:click={WithBlur(toggleAlwaysOnTop)}>
 		<AlwaysOnTop cls={clsAlwaysOnTop} />
 	</button>
-	<button class="btn" on:click={handleClick}>
+	<button class="btn" on:click={WithBlur(handleClick)}>
 		{#if isSoundOn}
 			<SoundOn />
 		{:else}
 			<SoundOff />
 		{/if}
 	</button>
-	<button class="btn btn-ghost" on:click={settingsClickHandler}>
+	<button class="btn btn-ghost" on:click={clickSettingsHandler}>
+		<Settings />
+	</button>
+	<button class="btn btn-ghost" on:click={WithBlur(lauchTaskWindow)}>
 		<Settings />
 	</button>
 </div>

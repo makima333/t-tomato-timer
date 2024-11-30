@@ -4,6 +4,7 @@ use std::error::Error;
 
 use tauri::Manager;
 use tauri_plugin_sql::{Migration, MigrationKind};
+use tauri_plugin_window_state::StateFlags;
 
 fn app_startup(app: &mut tauri::App) -> Result<(), Box<dyn Error>> {
     // This is the default config that will be written to the config file if it doesn't exist
@@ -28,6 +29,8 @@ fn app_startup(app: &mut tauri::App) -> Result<(), Box<dyn Error>> {
 }
 
 fn main() {
+    let state_flags = StateFlags::all() - StateFlags::VISIBLE;
+
     let migrations = vec![Migration {
         version: 1,
         description: "Initial migration",
@@ -36,13 +39,18 @@ fn main() {
     }];
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_sql::Builder::new().build())
         .plugin(
             tauri_plugin_sql::Builder::default()
                 .add_migrations("sqlite:mydatabase.db", migrations)
                 .build(),
         )
         .plugin(tauri_plugin_fs::init())
-        .plugin(tauri_plugin_window_state::Builder::default().build())
+        .plugin(
+            tauri_plugin_window_state::Builder::default()
+                .with_state_flags(state_flags)
+                .build(),
+        )
         .setup(app_startup)
         .invoke_handler(tauri::generate_handler![greet])
         .run(tauri::generate_context!())

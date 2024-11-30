@@ -38,6 +38,7 @@
 	"dependencies": {
 		"@tauri-apps/api": "^2.0.3",
 		"@tauri-apps/plugin-fs": "^2.0.1",
+		"@tauri-apps/plugin-sql": "^2.0.1",
 		"svelecte": "^4.2.5"
 	}
 }

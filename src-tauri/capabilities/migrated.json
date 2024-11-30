@@ -5,7 +5,8 @@
   "windows": [
     "tttimer",
     "setTask",
-    "settings"
+    "settings",
+    "task"
   ],
   "permissions": [
     "core:default",
@@ -43,6 +44,9 @@
     "core:window:allow-center",
     "core:window:allow-set-always-on-top",
     "core:webview:allow-create-webview-window",
-    "fs:default"
+    "fs:default",
+    "sql:default",
+    "sql:allow-execute",
+    "sql:default"
   ]
 }
