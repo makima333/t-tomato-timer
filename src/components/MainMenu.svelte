@@ -42,7 +42,7 @@
 		}
 	}
 
-	const clickSettingsHandler = WithBlur(lauchSettingsWindow)
+	const clickSettingsHandler = WithBlur(lauchSettingsWindow);
 
 	async function lauchSettingsWindow() {
 		const settingsWindow = new WebviewWindow('settings', {
@@ -50,7 +50,7 @@
 			title: 'Settings',
 			height: 400,
 			width: 400,
-			visible: false,
+			visible: false
 		});
 		settingsWindow.once('tauri://created', async function () {
 			// delay 500ms
@@ -65,7 +65,7 @@
 			title: 'task',
 			height: 450,
 			width: 400,
-			visible: false,
+			visible: false
 		});
 		settingsWindow.once('tauri://created', async function () {
 			// delay 500ms

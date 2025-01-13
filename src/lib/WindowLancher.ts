@@ -5,7 +5,7 @@ export async function setTaskWindowLancher() {
 		url: '/setTask',
 		title: 'Set Task',
 		height: 200,
-		width: 400,
+		width: 500,
 		decorations: false,
 		transparent: true,
 		resizable: false,
