@@ -16,6 +16,7 @@ const config = {
 		alias: {
 			// this will match a file
 			'$icons': 'src/icons',
+			'$components': 'src/components',
 		}
 	}
 };

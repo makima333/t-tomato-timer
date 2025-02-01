@@ -1,7 +1,5 @@
 {
-    "autoStartSessions": 3,
+    "task_id": 0,
     "alwaysOnTop": true,
-    "alertSound": true,
-    "timeDuration": 25,
-    "breakDuration": 5
+    "alertSound": true
 }
