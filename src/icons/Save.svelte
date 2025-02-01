@@ -2,7 +2,7 @@
 	export let cls = '';
 </script>
 
-<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class={`w-6 h-6 ${cls}`}>
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class={`w-4 h-4 ${cls}`}>
 	<path
 		fill="currentColor"
 		fill-rule="evenodd"

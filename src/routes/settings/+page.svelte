@@ -1,45 +1,45 @@
 <script lang="ts">
-	import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
-	import { settingsStore } from '$lib/Settings';
-	import { emit } from '@tauri-apps/api/event';
 	import { onMount } from 'svelte';
-	import { loadSettings, updateSettings } from '$lib/Settings';
+	import Settings from '$components/Settings.svelte';
+	import Task from '$components/Tasks.svelte';
+	// import { taskStore } from './stores/taskStore'; // タスク管理用
+	// import { settingsStore, updateSettings } from './stores/settingsStore'; // 設定管理用
+	let currentTab = 'settings';
 
-	async function save() {
-		updateSettings('timeDuration', $settingsStore.timeDuration);
-		updateSettings('breakDuration', $settingsStore.breakDuration);
-		updateSettings('autoStartSessions', $settingsStore.autoStartSessions);
-		emit('settings-changed', { $settingsStore });
-	}
-
-	onMount(async () => {
-		await loadSettings();
-	});
+	onMount(async () => {});
 </script>
 
-<main>
-	<div>
-		<div class="p-4">
-			Time Duration (minutes)
-			<label class="input input-bordered flex items-center gap-4">
-				<input type="number" class="grow" bind:value={$settingsStore.timeDuration} />
-			</label>
-		</div>
-		<div class="p-4">
-			Break Duration (minutes)
-			<label class="input input-bordered flex items-center gap-4">
-				<input type="number" class="grow" bind:value={$settingsStore.breakDuration} />
-			</label>
-		</div>
-		<div class="p-4">
-			Auto Start Sessions
-			<label class="input input-bordered flex items-center gap-4">
-				<input type="number" class="grow" bind:value={$settingsStore.autoStartSessions} />
-			</label>
-		</div>
+<main class="p-2">
+	<div role="tablist" class="tabs tabs-lifted">
+		<!-- svelte-ignore a11y-missing-attribute -->
+		<!-- svelte-ignore a11y-interactive-supports-focus -->
+		<!-- svelte-ignore a11y-click-events-have-key-events -->
+		<a
+			role="tab"
+			class="tab {currentTab === 'settings' ? 'tab-active' : ''}"
+			on:click={() => {
+				currentTab = 'settings';
+			}}
+		>
+			Settings
+		</a>
+		<!-- svelte-ignore a11y-missing-attribute -->
+		<!-- svelte-ignore a11y-interactive-supports-focus -->
+		<!-- svelte-ignore a11y-click-events-have-key-events -->
+		<a
+			role="tab"
+			class="tab {currentTab === 'task' ? 'tab-active' : ''}"
+			on:click={() => {
+				currentTab = 'task';
+			}}>Tasks</a
+		>
+		<!-- svelte-ignore a11y-missing-attribute -->
 	</div>
-	<!-- fotter -->
-	<div class="p-4 flex justify-end space-x-2">
-		<button class="btn btn-primary" on:click={save}>Save</button>
-	</div>
+
+	{#if currentTab === 'settings'}
+		<Settings />
+	{:else}
+		<Task />
+		<!-- <Task /> -->
+	{/if}
 </main>

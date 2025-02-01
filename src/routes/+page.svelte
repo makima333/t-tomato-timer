@@ -9,8 +9,9 @@
 	import { AudioPlayer } from '$lib/AudioPlay';
 	import { WithBlur } from '$lib/WithBlur';
 	import { SetAlwaysOnTopOn } from '$lib/WindowApi';
-	import { settingsStore, loadSettings } from '$lib/Settings';
 	import { setTaskWindowLancher } from '$lib/WindowLancher';
+	import { settingsStore, loadSettings } from '$lib/Settings';
+	import { TaskDBClient } from '$lib/sqls/task';
 
 	import CloseButton from '../icons/Close.svelte';
 	import PlayButton from '../icons/Play.svelte';
@@ -18,30 +19,35 @@
 	import PauseButton from '../icons/Pause.svelte';
 	import MenuButton from '../icons/Menu.svelte';
 	import AlertWav from '../assets/alert.wav';
-	import { listen } from '@tauri-apps/api/event';
+	import { emit, listen } from '@tauri-apps/api/event';
 	const appWindow = getCurrentWebviewWindow();
 
 	const INTERVAL = 1000 * 60;
 	// const INTERVAL = 100;
 
 	const isLoadedConfig = writable(false);
-	let workTime = $settingsStore.timeDuration as number;
-	let breakTime = $settingsStore.breakDuration as number;
+	const timerStore = writable({ workTime: 25, breakTime: 5, autoStartSessions: 0 });
+	let taskName = '';
+	let activeTaskId = $settingsStore.taskId as number;
+	let workTime = $timerStore.workTime as number;
+	let breakTime = $timerStore.breakTime as number;
 	let autoStartSessions = $settingsStore.autoStartSessions as number;
 
 	$: if ($isLoadedConfig === true) {
-		workTime = $settingsStore.timeDuration as number;
-		breakTime = $settingsStore.breakDuration as number;
+		activeTaskId = $settingsStore.taskId as number;
+		workTime = $timerStore.workTime as number;
+		breakTime = $timerStore.breakTime as number;
 		autoStartSessions = $settingsStore.autoStartSessions as number;
+		emit('task-changed', { taskId: activeTaskId });
 	}
 
 	let intervalId: number | undefined = undefined;
-	const time = writable($settingsStore.timeDuration as number);
+	const time = writable($timerStore.workTime as number);
 	const playPauseToggle = writable(true);
 	const workBreakToggle = writable(true);
 	const audioPlayer = new AudioPlayer(AlertWav, 2);
 
-	$: time.update(() => $settingsStore.timeDuration as number);
+	$: time.update(() => $timerStore.workTime as number);
 	$: isSoundOn = $settingsStore.alertSound as boolean;
 	$: if ($settingsStore.alwaysOnTop) {
 		SetAlwaysOnTopOn();
@@ -124,7 +130,7 @@
 		appWindow.close();
 	}
 
-	let worktimes = Array.from({ length: $settingsStore.timeDuration as number }, (_, i) => i + 1);
+	let worktimes = Array.from({ length: $timerStore.workTime as number }, (_, i) => i + 1);
 
 	time.subscribe((value) => {
 		worktimes = Array.from({ length: value }, (_, i) => i + 1);
@@ -157,21 +163,41 @@
 		}
 	}
 
-	$: appWindow.setSize(new LogicalSize(300 + ($settingsStore.timeDuration as number) * 10, 55));
+	$: appWindow.setSize(new LogicalSize(300 + ($timerStore.workTime as number) * 10, 55));
 
 	const playPauseClickHandler = WithBlur(toggleTimer);
 	const stopClickHandler = WithBlur(stopTimer);
 	const menuClickHnadler = WithBlur(toggleDrawer);
 
 	onMount(async () => {
-		await getCurrentWebviewWindow().show();
-		await getCurrentWebviewWindow().setShadow(false);
-		await loadSettings();
-		isLoadedConfig.set(true);
 		listen('settings-changed', async (event) => {
 			stopTimer();
 			await loadSettings();
 		});
+
+		listen('task-changed', async (event: { payload: { taskId: number } }) => {
+			const taskId = event.payload?.taskId ?? 0;
+			const taskDBClient = await TaskDBClient.load('sqlite:mydatabase.db');
+			const task = await taskDBClient.read(taskId);
+			if (task.length > 0) {
+				const { id, name, work_time, break_time, auto_start } = task[0];
+				taskName = name;
+				timerStore.set({
+					workTime: work_time,
+					breakTime: break_time,
+					autoStartSessions: auto_start
+				});
+			} else {
+				taskName = 'Pomodoro Timer';
+			}
+			stopTimer();
+		});
+
+		await loadSettings();
+		isLoadedConfig.set(true);
+		console.log('activeTaskId', activeTaskId);
+		await getCurrentWebviewWindow().show();
+		await getCurrentWebviewWindow().setShadow(false);
 	});
 
 	onDestroy(async () => {
@@ -189,7 +215,7 @@
 					class="badge badge-xs badge-ghost text-black bg-inherit border-transparent z-50"
 					style="cursor: default;"
 				>
-					Work Name
+					{taskName}
 				</span>
 			</div>
 			<button on:click={closeWindow} class="mr-2">

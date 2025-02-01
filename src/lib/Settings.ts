@@ -2,21 +2,17 @@ import { readTextFile, writeTextFile, BaseDirectory } from '@tauri-apps/plugin-f
 import { writable, get } from 'svelte/store';
 
 type SettingsType = {
-	autoStartSessions: number;
+	taskId: number;
 	alertSound: boolean;
 	alwaysOnTop: boolean;
-	timeDuration: number;
-	breakDuration: number;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	[key: string]: any;
 };
 
 const defaultSettings: SettingsType = {
-	autoStartSessions: 3,
+	taskId: 0,
 	alertSound: true,
-	alwaysOnTop: false,
-	timeDuration: 25,
-	breakDuration: 5
+	alwaysOnTop: false
 };
 
 const FILENAME = 'config.json';
