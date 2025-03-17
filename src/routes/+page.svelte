@@ -10,7 +10,7 @@
 	import { WithBlur } from '$lib/WithBlur';
 	import { SetAlwaysOnTopOn } from '$lib/WindowApi';
 	import { setTaskWindowLancher } from '$lib/WindowLancher';
-	import { settingsStore, loadSettings } from '$lib/Settings';
+	import { settings } from '$lib/Settings';
 	import { TaskDBClient } from '$lib/sqls/task';
 
 	import CloseButton from '../icons/Close.svelte';
@@ -25,19 +25,18 @@
 	const INTERVAL = 1000 * 60;
 	// const INTERVAL = 100;
 
-	const isLoadedConfig = writable(false);
 	const timerStore = writable({ workTime: 25, breakTime: 5, autoStartSessions: 0 });
 	let taskName = '';
-	let activeTaskId = $settingsStore.taskId as number;
+	let activeTaskId = $settings.taskId as number;
+	let autoStartSessions: number;
 	let workTime = $timerStore.workTime as number;
 	let breakTime = $timerStore.breakTime as number;
-	let autoStartSessions = $settingsStore.autoStartSessions as number;
 
-	$: if ($isLoadedConfig === true) {
-		activeTaskId = $settingsStore.taskId as number;
+	function initialize() {
+		activeTaskId = $settings.taskId as number;
 		workTime = $timerStore.workTime as number;
 		breakTime = $timerStore.breakTime as number;
-		autoStartSessions = $settingsStore.autoStartSessions as number;
+		autoStartSessions = $timerStore.autoStartSessions as number;
 		emit('task-changed', { taskId: activeTaskId });
 	}
 
@@ -48,10 +47,11 @@
 	const audioPlayer = new AudioPlayer(AlertWav, 2);
 
 	$: time.update(() => $timerStore.workTime as number);
-	$: isSoundOn = $settingsStore.alertSound as boolean;
-	$: if ($settingsStore.alwaysOnTop) {
+	$: isSoundOn = $settings.alertSound as boolean;
+	$: if ($settings.alwaysOnTop) {
 		SetAlwaysOnTopOn();
 	}
+	$: autoStartSessions = $timerStore.autoStartSessions as number;
 
 	// タイマーを開始する関数
 	function startTimer() {
@@ -77,22 +77,23 @@
 					if ($workBreakToggle) {
 						workBreakToggle.set(false);
 						isFinished = true;
-						return breakTime;
+						return $timerStore.breakTime as number;
 					}
 					workBreakToggle.set(true);
 					isFinished = true;
-					return workTime;
+					return $timerStore.workTime as number;
 				}
 				return n - 1;
 			});
+			// 自動スタートの処理
 			if (isFinished && autoStartSessions > 0) {
-				if (get(time) === workTime) {
+				if (get(time) === $timerStore.workTime) {
 					autoStartSessions--;
 				}
 				if (autoStartSessions > 0) {
 					startTimer();
 				} else {
-					autoStartSessions = $settingsStore.autoStartSessions as number;
+					autoStartSessions = $timerStore.autoStartSessions as number;
 				}
 			}
 		}, INTERVAL);
@@ -116,10 +117,10 @@
 	function stopTimer() {
 		clearInterval(intervalId);
 		intervalId = undefined;
-		time.set(workTime);
+		time.set($timerStore.workTime);
 		playPauseToggle.set(true);
 		workBreakToggle.set(true);
-		autoStartSessions = $settingsStore.autoStartSessions as number;
+		autoStartSessions = $settings.autoStartSessions as number;
 	}
 
 	function toggleDrawer() {
@@ -168,11 +169,18 @@
 	const playPauseClickHandler = WithBlur(toggleTimer);
 	const stopClickHandler = WithBlur(stopTimer);
 	const menuClickHnadler = WithBlur(toggleDrawer);
+	const closeDrawerHandler = WithBlur(closeDrawer);
+
+	function closeDrawer() {
+		document.getElementById('my-drawer-2')?.click();
+		console.log('hoge');
+	}
 
 	onMount(async () => {
 		listen('settings-changed', async (event) => {
 			stopTimer();
-			await loadSettings();
+			await settings.loadSettings();
+			initialize();
 		});
 
 		listen('task-changed', async (event: { payload: { taskId: number } }) => {
@@ -193,8 +201,9 @@
 			stopTimer();
 		});
 
-		await loadSettings();
-		isLoadedConfig.set(true);
+		await settings.loadSettings();
+		initialize();
+
 		console.log('activeTaskId', activeTaskId);
 		await getCurrentWebviewWindow().show();
 		await getCurrentWebviewWindow().setShadow(false);
@@ -206,7 +215,7 @@
 </script>
 
 <main class="drawer drawer-end bg-slate-50 rounded-lg">
-	<input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
+	<input id="my-drawer-2" type="checkbox" class="drawer-toggle" tabindex="-1" />
 	<div class="drawer-content">
 		<div data-tauri-drag-region class="titlebar h-5 bg-slate-200 flex justify-between rounded-t-lg">
 			<div data-tauri-drag-region class="text-black pl-2 text-sm">
@@ -262,8 +271,16 @@
 		</div>
 	</div>
 	<div class="drawer-side">
-		<label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label>
-		<div class="w-full bg-base-100 min-h-full text-base-content flex">
+		<!-- svelte-ignore a11y-click-events-have-key-events -->
+		<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+		<div
+			role="button"
+			aria-label="close sidebar"
+			class="drawer-overlay"
+			on:click={closeDrawerHandler}
+			tabindex="0"
+		></div>
+		<div class=" bg-base-100 min-h-full text-base-content flex">
 			<MainMenu closeDrawer={toggleDrawer} />
 		</div>
 	</div>

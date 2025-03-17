@@ -88,7 +88,7 @@
 							<input
 								type="number"
 								value={task.work_time}
-								class="input w-full"
+								class="input w-full input-primary"
 								on:input={(e) => handleInputChange(task.id, 'work_time', e)}
 							/>
 						</td>
@@ -96,7 +96,7 @@
 							<input
 								type="number"
 								value={task.break_time}
-								class="input w-full"
+								class="input w-full input-primary"
 								on:input={(e) => handleInputChange(task.id, 'break_time', e)}
 							/>
 						</td>
@@ -104,7 +104,7 @@
 							<input
 								type="number"
 								value={task.auto_start}
-								class="input w-full"
+								class="input w-full input-primary"
 								on:input={(e) => handleInputChange(task.id, 'auto_start', e)}
 							/>
 						</td>

@@ -43,3 +43,36 @@ export function updateSettings(key: string, value: unknown) {
 	});
 	saveSettings(get(settingsStore));
 }
+
+function createSettingsStore() {
+	const { subscribe, set, update } = writable(defaultSettings);
+
+	return {
+		set,
+		subscribe,
+		async loadSettings() {
+			try {
+				const config = await readTextFile(FILENAME, { baseDir: BaseDirectory.AppConfig });
+				set(JSON.parse(config));
+			} catch (error) {
+				console.error(error);
+				return defaultSettings;
+			}
+		},
+		async updateSettings(key: string, value: unknown) {
+			update((settings) => {
+				settings[key] = value;
+				return settings;
+			});
+			try {
+				await writeTextFile(FILENAME, JSON.stringify(settings), {
+					baseDir: BaseDirectory.AppConfig
+				});
+			} catch (error) {
+				console.error(error);
+			}
+		}
+	};
+}
+
+export const settings = createSettingsStore();

@@ -93,7 +93,4 @@
 	<button class="btn btn-ghost" on:click={clickSettingsHandler}>
 		<Settings />
 	</button>
-	<button class="btn btn-ghost" on:click={WithBlur(lauchTaskWindow)}>
-		<Settings />
-	</button>
 </div>
