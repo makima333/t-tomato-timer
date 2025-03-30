@@ -16,11 +16,14 @@
 	async function save() {
 		updateSettings('alertSound', $settingsStore.alertSound);
 		updateSettings('alwaysOnTop', $settingsStore.alwaysOnTop);
-		if (task) updateSettings('taskId', task.id);
+		if (task) {
+			updateSettings('taskId', task.id);
+		} else {
+			updateSettings('taskId', $settingsStore.taskId);
+		}
 		emit('settings-changed', { $settingsStore });
 
 		selectTaskPlaceholder = task ? task.name : 'Select Task';
-		task = null;
 	}
 
 	onMount(async () => {

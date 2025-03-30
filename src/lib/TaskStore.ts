@@ -17,6 +17,10 @@ function createTaskStore() {
 			tasks.forEach((task: any) => {
 				task.edit = false;
 			});
+			// sort tasks name 
+			tasks.sort((a: any, b: any) => {
+				return a.name.localeCompare(b.name);
+			});
 			set(tasks);
 		},
 		addTask: async (taskName: string) => {

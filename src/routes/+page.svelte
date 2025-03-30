@@ -214,7 +214,7 @@
 	});
 </script>
 
-<main class="drawer drawer-end bg-slate-50 rounded-lg">
+<main class="drawer drawer-end bg-slate-50 rounded-lg min-h-screen">
 	<input id="my-drawer-2" type="checkbox" class="drawer-toggle" tabindex="-1" />
 	<div class="drawer-content">
 		<div data-tauri-drag-region class="titlebar h-5 bg-slate-200 flex justify-between rounded-t-lg">
@@ -280,7 +280,7 @@
 			on:click={closeDrawerHandler}
 			tabindex="0"
 		></div>
-		<div class=" bg-base-100 min-h-full text-base-content flex">
+		<div class=" bg-base-100 h-full text-base-content flex">
 			<MainMenu closeDrawer={toggleDrawer} />
 		</div>
 	</div>
