@@ -24,6 +24,7 @@
 		emit('settings-changed', { $settingsStore });
 
 		selectTaskPlaceholder = task ? task.name : 'Select Task';
+		task = null;
 	}
 
 	onMount(async () => {
