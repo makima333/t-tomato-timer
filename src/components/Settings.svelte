@@ -3,7 +3,7 @@
 	import { emit } from '@tauri-apps/api/event';
 	import Select from 'svelte-select';
 
-	import { loadSettings, settingsStore, updateSettings } from '$lib/Settings';
+	import { settings } from '$lib/SettingsStore';
 	import { taskStore } from '$lib/TaskStore';
 
 	let task: any;
@@ -14,25 +14,26 @@
 	}
 
 	async function save() {
-		updateSettings('alertSound', $settingsStore.alertSound);
-		updateSettings('alwaysOnTop', $settingsStore.alwaysOnTop);
+		await settings.updateSettings('alertSound', $settings.alertSound);
+		await settings.updateSettings('alwaysOnTop', $settings.alwaysOnTop);
 		if (task) {
-			updateSettings('taskId', task.id);
+			await settings.updateSettings('taskId', task.id);
 		} else {
-			updateSettings('taskId', $settingsStore.taskId);
+			await settings.updateSettings('taskId', $settings.taskId);
 		}
-		emit('settings-changed', { $settingsStore });
+		await emit('settings-changed', { $settings });
 
 		selectTaskPlaceholder = task ? task.name : 'Select Task';
 		task = null;
 	}
 
 	onMount(async () => {
-		await loadSettings();
+		await settings.loadSettings();
 		await taskStore.fetchTasks();
 
-		if ($settingsStore.taskId) {
-			const activeTask = $taskStore.find((t) => t.id === $settingsStore.taskId);
+		if ($settings.taskId) {
+			const activeTask = $taskStore.find((t) => t.id === $settings.taskId);
+			console.log('Active Task:', activeTask);
 			if (activeTask) {
 				selectTaskPlaceholder = activeTask.name;
 			} else {
@@ -46,12 +47,12 @@
 	<div class="p-4 space-y-2">
 		<!-- alert sound -->
 		<label class="input input-bordered flex items-center gap-4">
-			<input type="checkbox" bind:checked={$settingsStore.alertSound} />
+			<input type="checkbox" bind:checked={$settings.alertSound} />
 			<span>Alert Sound</span>
 		</label>
 		<!-- always on top -->
 		<label class="input input-bordered flex items-center gap-4">
-			<input type="checkbox" bind:checked={$settingsStore.alwaysOnTop} />
+			<input type="checkbox" bind:checked={$settings.alwaysOnTop} />
 			<span>Always on Top</span>
 		</label>
 		<!-- task -->

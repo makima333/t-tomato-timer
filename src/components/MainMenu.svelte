@@ -2,14 +2,13 @@
 	export let closeDrawer = () => {};
 
 	import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
-	import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 	import { LogicalSize } from '@tauri-apps/api/dpi';
 
 	import { SetAlwaysOnTopOn, SetAlwaysOnTopOff } from '$lib/WindowApi';
 	import { SetSoundOn, SetSoundOff } from '$lib/SoundToggle';
 	import { AudioPlayer } from '$lib/AudioPlay';
 	import { WithBlur } from '$lib/WithBlur';
-	import { settingsStore } from '$lib/Settings';
+	import { settings } from '$lib/SettingsStore';
 
 	import AlwaysOnTop from '../icons/AlwaysOnTop.svelte';
 	import CloseMenu from '../icons/CloseMenu.svelte';
@@ -17,12 +16,11 @@
 	import SoundOn from '../icons/SoundOn.svelte';
 	import SoundOff from '../icons/SoundOff.svelte';
 	import AlertWav from '../assets/alert.wav';
-	const appWindow = getCurrentWebviewWindow();
 
 	let audioPlayer = new AudioPlayer(AlertWav, 1);
 
-	$: isAlwaysOnTop = $settingsStore.alwaysOnTop;
-	$: isSoundOn = $settingsStore.alertSound;
+	$: isAlwaysOnTop = $settings.alwaysOnTop;
+	$: isSoundOn = $settings.alertSound;
 	$: clsAlwaysOnTop = isAlwaysOnTop ? 'text-primary' : '';
 
 	function toggleAlwaysOnTop() {

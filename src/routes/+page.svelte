@@ -8,9 +8,9 @@
 	import MainMenu from '../components/MainMenu.svelte';
 	import { AudioPlayer } from '$lib/AudioPlay';
 	import { WithBlur } from '$lib/WithBlur';
-	import { SetAlwaysOnTopOn } from '$lib/WindowApi';
+	import { SetAlwaysOnTopOn, SetAlwaysOnTopOff } from '$lib/WindowApi';
 	import { setTaskWindowLancher } from '$lib/WindowLancher';
-	import { settings } from '$lib/Settings';
+	import { settings } from '$lib/SettingsStore';
 	import { TaskDBClient } from '$lib/sqls/task';
 
 	import CloseButton from '../icons/Close.svelte';
@@ -49,7 +49,9 @@
 	$: time.update(() => $timerStore.workTime as number);
 	$: isSoundOn = $settings.alertSound as boolean;
 	$: if ($settings.alwaysOnTop) {
-		SetAlwaysOnTopOn();
+		appWindow.setAlwaysOnTop(true);
+	} else {
+		appWindow.setAlwaysOnTop(false);
 	}
 	$: autoStartSessions = $timerStore.autoStartSessions as number;
 
@@ -173,7 +175,6 @@
 
 	function closeDrawer() {
 		document.getElementById('my-drawer-2')?.click();
-		console.log('hoge');
 	}
 
 	onMount(async () => {
@@ -224,7 +225,11 @@
 					class="badge badge-xs badge-ghost text-black bg-inherit border-transparent z-50"
 					style="cursor: default;"
 				>
-					{taskName}
+					{#if taskName === 'Pomodoro Timer'}
+						Pomodoro Timer
+					{:else}
+						tttimer -- {taskName}
+					{/if}
 				</span>
 			</div>
 			<button on:click={closeWindow} class="mr-2">
