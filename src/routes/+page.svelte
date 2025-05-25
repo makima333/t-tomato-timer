@@ -205,7 +205,6 @@
 		await settings.loadSettings();
 		initialize();
 
-		console.log('activeTaskId', activeTaskId);
 		await getCurrentWebviewWindow().show();
 		await getCurrentWebviewWindow().setShadow(false);
 	});

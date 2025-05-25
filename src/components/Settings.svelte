@@ -33,7 +33,7 @@
 
 		if ($settings.taskId) {
 			const activeTask = $taskStore.find((t) => t.id === $settings.taskId);
-			console.log('Active Task:', activeTask);
+
 			if (activeTask) {
 				selectTaskPlaceholder = activeTask.name;
 			} else {

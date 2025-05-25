@@ -18,33 +18,6 @@ const defaultSettings: SettingsType = {
 const FILENAME = 'config.json';
 export const settingsStore = writable(defaultSettings);
 
-// export async function loadSettings() {
-// 	try {
-// 		const config = await readTextFile(FILENAME, { baseDir: BaseDirectory.AppConfig });
-// 		settingsStore.set(JSON.parse(config));
-// 	} catch (error) {
-// 		return defaultSettings;
-// 	}
-// }
-
-// // eslint-disable-next-line @typescript-eslint/no-explicit-any
-// export async function saveSettings(settings: Record<string, any>) {
-// 	try {
-// 		await writeTextFile(FILENAME, JSON.stringify(settings), { baseDir: BaseDirectory.AppConfig });
-// 	} catch (error) {
-// 		console.error(error);
-// 	}
-// }
-
-// export async function updateSettings(key: string, value: unknown) {
-// 	console.log('Updating settings...');
-// 	console.log(key, value);
-// 	settingsStore.update((settings) => {
-// 		settings[key] = value;
-// 		return settings;
-// 	});
-// 	await saveSettings(get(settingsStore));
-// }
 
 function createSettingsStore() {
 	const { subscribe, set, update } = writable(defaultSettings);
