@@ -39,7 +39,7 @@
 		await getCurrentWebviewWindow().show();
 		await taskStore.fetchTasks();
 		// on focus,
-		document.getElementById('active-task-select').focus();
+		document.getElementById('active-task-select')?.focus();
 	});
 
 	let floatingConfig = {
@@ -47,6 +47,7 @@
 	};
 </script>
 
+RTX 5060 Ti 16GB
 <main class="rounded-lg">
 	<Select
 		id="active-task-select"

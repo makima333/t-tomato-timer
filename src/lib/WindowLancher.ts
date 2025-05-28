@@ -1,5 +1,6 @@
 import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
 import { currentMonitor } from '@tauri-apps/api/window';
+import { PhysicalPosition } from '@tauri-apps/api/dpi';
 
 export async function setTaskWindowLancher() {
   // Get the current monitor where the main window is located
@@ -14,13 +15,22 @@ export async function setTaskWindowLancher() {
     transparent: true,
     resizable: false,
     shadow: false,
-    // Don't set position here to allow centering on the current monitor
   });
   
   setTaskWindow.once('tauri://created', async function () {
-		console.log(monitor)
     if (monitor) {
-      // TODO: Get the monitor's size and position
+      const { x: posx, y: posy } = monitor.position;
+      const {width, height} = monitor.size;
+      console.log('Monitor position:', posx===0, posy===0);
+        // Position the window at the center of the monitor
+        await setTaskWindow.setPosition(
+          new PhysicalPosition(
+            posx + (width - 500) / 2,
+            posy + (height - 200) / 2
+          )
+        )
+    } else {
+      console.warn('No monitor information available');
       await setTaskWindow.center();
     }
   });
