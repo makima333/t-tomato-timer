@@ -12,7 +12,7 @@ A simple tomato timer for time management.
 - [x] Start/Pause/Reset by hotkey
 - [x] Customizable timer duration
 - [x] Auto start next timer
-- [ ] Set task name
+- [x] Set task name
 
 ## Teck Stack
 
