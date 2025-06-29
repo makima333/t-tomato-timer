@@ -31,12 +31,20 @@ fn app_startup(app: &mut tauri::App) -> Result<(), Box<dyn Error>> {
 fn main() {
     let state_flags = StateFlags::all() - StateFlags::VISIBLE;
 
-    let migrations = vec![Migration {
-        version: 1,
-        description: "Initial migration",
-        sql: include_str!("./migrations/000_initial.sql"),
-        kind: MigrationKind::Up,
-    }];
+    let migrations = vec![
+        Migration {
+            version: 1,
+            description: "Initial migration",
+            sql: include_str!("./migrations/000_initial.sql"),
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 2,
+            description: "Task session table",
+            sql: include_str!("./migrations/001_task_session.sql"),
+            kind: MigrationKind::Up,
+        },
+    ];
 
     tauri::Builder::default()
         .plugin(tauri_plugin_sql::Builder::new().build())
