@@ -1,32 +1,31 @@
-<script>
+<script lang="ts">
 	import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 	import { onMount } from 'svelte';
 	import Select from 'svelte-select';
 	import { taskStore } from '$lib/TaskStore';
 	import { settings } from '$lib/SettingsStore';
+	import { emit } from '@tauri-apps/api/event';
 
 	const appWindow = getCurrentWebviewWindow();
 
-	/** @type {{ id: number; label: string } | null } */
-	let task = null;
+	let task: any = null;
+	let selectTaskPlaceholder: string = '';
 
-	/**
-	 * @param {{ id: number; label: string }} item
-	 */
-	function handleTaskOptionClick(item) {
-		if (item) task = item;
+	function handleTaskOptionClick(item: any) {
+		if (item) {
+			task = item;
+			// appWindow.close();
+		}
 	}
 
-	/**
-	 * @param {{ key: string; }} event
-	 */
-	async function onKeyDown(event) {
+	async function onKeyDown(event: KeyboardEvent) {
 		if (event.key === 'Escape') {
 			appWindow.close();
 		}
 		if (event.key === 'Enter') {
 			if (task) {
 				await settings.updateSettings('taskId', task.id);
+				await emit('settings-changed', { $settings });
 				appWindow.close();
 			}
 		}
@@ -37,9 +36,21 @@
 		// tmp fix for focus issue
 		await getCurrentWebviewWindow().hide();
 		await getCurrentWebviewWindow().show();
+
+		await settings.loadSettings();
 		await taskStore.fetchTasks();
 		// on focus,
 		document.getElementById('active-task-select')?.focus();
+
+		if ($settings.taskId) {
+			const activeTask = $taskStore.find((t) => t.id === $settings.taskId);
+
+			if (activeTask) {
+				selectTaskPlaceholder = activeTask.name;
+			} else {
+				selectTaskPlaceholder = 'Select Task';
+			}
+		}
 	});
 
 	let floatingConfig = {
@@ -47,7 +58,6 @@
 	};
 </script>
 
-RTX 5060 Ti 16GB
 <main class="rounded-lg">
 	<Select
 		id="active-task-select"
@@ -56,7 +66,9 @@ RTX 5060 Ti 16GB
 		listAutoWidth={true}
 		{floatingConfig}
 		class="input"
+		placeholder={selectTaskPlaceholder || 'Select Task'}
 		bind:value={task}
+		searchable={task ? false : true}
 	>
 		<div slot="list" let:filteredItems>
 			<div class="overflow-y-auto p-2 max-h-28">
