@@ -41,11 +41,13 @@
   },
   "productName": "tttimer",
   "mainBinaryName": "tttimer",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "identifier": "tttimer",
   "plugins": {
     "sql": {
-      "preload": ["sqlite:mydatabase.db"]
+      "preload": [
+        "sqlite:mydatabase.db"
+      ]
     }
   },
   "app": {
@@ -53,7 +55,7 @@
       {
         "label": "tttimer",
         "fullscreen": false,
-        "height": 55         ,
+        "height": 55,
         "resizable": false,
         "title": "tttimer",
         "width": 500,
