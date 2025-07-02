@@ -7,14 +7,14 @@ A simple tomato timer for time management.
 ## Features
 
 - [x] Start/Pause/Reset timer
-- [x] Alway on top
+- [x] Always on top
 - [x] Alert when time is up
-- [ ] Customizable timer duration
-- [ ] Auto start next timer
-- [ ] Set task name
-- [ ] Task history
+- [x] Start/Pause/Reset by hotkey
+- [x] Customizable timer duration
+- [x] Auto start next timer
+- [x] Set task name
 
-## Teck Stack
+## Tech Stack
 
 - tauri
 - svelte
