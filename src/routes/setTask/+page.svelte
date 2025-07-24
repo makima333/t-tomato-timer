@@ -8,13 +8,15 @@
 
 	const appWindow = getCurrentWebviewWindow();
 
-	let task: any = null;
+	let value: any = null;
 	let selectTaskPlaceholder: string = '';
 
-	function handleTaskOptionClick(item: any) {
+	async function handleTaskOptionClick(item: any) {
 		if (item) {
-			task = item;
-			// appWindow.close();
+			await settings.updateSettings('taskId', item.id);
+			await emit('settings-changed', { $settings });
+			value = item;
+			appWindow.close();
 		}
 	}
 
@@ -23,8 +25,8 @@
 			appWindow.close();
 		}
 		if (event.key === 'Enter') {
-			if (task) {
-				await settings.updateSettings('taskId', task.id);
+			if (value) {
+				await settings.updateSettings('taskId', value.id);
 				await emit('settings-changed', { $settings });
 				appWindow.close();
 			}
@@ -59,30 +61,14 @@
 </script>
 
 <main class="rounded-lg">
-	<Select
-		id="active-task-select"
-		items={$taskStore}
-		label="name"
-		listAutoWidth={true}
-		{floatingConfig}
-		class="input"
-		placeholder={selectTaskPlaceholder || 'Select Task'}
-		bind:value={task}
-		searchable={task ? false : true}
-	>
-		<div slot="list" let:filteredItems>
-			<div class="overflow-y-auto p-2 max-h-28">
-				{#each filteredItems as item (item.id)}
-					<div class="pt-1 pl-1">
-						<button
-							class="btn btn-ghost w-full justify-start"
-							on:click={() => handleTaskOptionClick(item)}
-						>
-							{item.name}
-						</button>
-					</div>
-				{/each}
-			</div>
+	<Select id="active-task-select" items={$taskStore} itemId="id" {floatingConfig} bind:value>
+		<div slot="item" let:item let:index>
+			<button
+				on:click={async () => await handleTaskOptionClick(item)}
+				class="w-full text-left px-2"
+			>
+				{item.label}
+			</button>
 		</div>
 	</Select>
 </main>

@@ -9,7 +9,7 @@ export async function setTaskWindowLancher() {
   const setTaskWindow = new WebviewWindow('setTask', {
     url: '/setTask',
     title: 'Set Task',
-    height: 200,
+    height: 400,
     width: 500,
     decorations: false,
     transparent: true,

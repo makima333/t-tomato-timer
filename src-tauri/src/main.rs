@@ -29,7 +29,7 @@ fn app_startup(app: &mut tauri::App) -> Result<(), Box<dyn Error>> {
 }
 
 fn main() {
-    let state_flags = StateFlags::all() - StateFlags::VISIBLE;
+    let state_flags = StateFlags::all() - StateFlags::VISIBLE - StateFlags::SIZE;
 
     let migrations = vec![Migration {
         version: 1,
