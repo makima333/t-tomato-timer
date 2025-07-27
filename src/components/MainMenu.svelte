@@ -46,7 +46,7 @@
 		const settingsWindow = new WebviewWindow('settings', {
 			url: '/settings',
 			title: 'Settings',
-			height: 400,
+			height: 600,
 			width: 750,
 			visible: false
 		});
@@ -54,22 +54,7 @@
 			// delay 500ms
 			await new Promise((resolve) => setTimeout(resolve, 500));
 			await settingsWindow.show();
-			await settingsWindow.setSize(new LogicalSize(750, 450));
-		});
-	}
-	async function lauchTaskWindow() {
-		const settingsWindow = new WebviewWindow('task', {
-			url: '/task',
-			title: 'task',
-			height: 450,
-			width: 750,
-			visible: false
-		});
-		settingsWindow.once('tauri://created', async function () {
-			// delay 500ms
-			await new Promise((resolve) => setTimeout(resolve, 500));
-			await settingsWindow.show();
-			await settingsWindow.setSize(new LogicalSize(400, 450));
+			await settingsWindow.setSize(new LogicalSize(750, 600));
 		});
 	}
 </script>

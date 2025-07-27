@@ -15,6 +15,7 @@ export async function setTaskWindowLancher() {
     transparent: true,
     resizable: false,
     shadow: false,
+    visible: true,
   });
   
   setTaskWindow.once('tauri://created', async function () {

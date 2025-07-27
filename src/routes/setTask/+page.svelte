@@ -62,7 +62,7 @@
 
 <main class="rounded-lg">
 	<Select id="active-task-select" items={$taskStore} itemId="id" {floatingConfig} bind:value>
-		<div slot="item" let:item let:index>
+		<div slot="item" let:item>
 			<button
 				on:click={async () => await handleTaskOptionClick(item)}
 				class="w-full text-left px-2"

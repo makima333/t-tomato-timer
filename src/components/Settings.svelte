@@ -9,10 +9,6 @@
 	let task: any;
 	let selectTaskPlaceholder: string = '';
 
-	function handleTaskOptionClick(item: any) {
-		if (item) task = item;
-	}
-
 	async function save() {
 		await settings.updateSettings('alertSound', $settings.alertSound);
 		await settings.updateSettings('alwaysOnTop', $settings.alwaysOnTop);
@@ -41,6 +37,10 @@
 			}
 		}
 	});
+
+	let floatingConfig = {
+		strategy: 'fixed'
+	};
 </script>
 
 <main>
@@ -57,33 +57,15 @@
 		</label>
 		<!-- task -->
 		<div>
-			<label for="active-task-select">Active Task</label>
+			<div class="py-2">Active Task</div>
 			<Select
-				id="active-task-select"
 				class="input input-bordered max-w-sm"
-				placeholder={selectTaskPlaceholder}
 				items={$taskStore}
-				label="name"
+				itemId="id"
+				{floatingConfig}
 				bind:value={task}
-				on:focus={() => (task = null)}
-			>
-				<div slot="list" let:filteredItems>
-					{#if !task}
-						<div class="max-h-40 overflow-y-auto p-2">
-							{#each filteredItems as item (item.id)}
-								<div class="pt-1 pl-1">
-									<button
-										class="btn btn-ghost w-full justify-start"
-										on:click={() => handleTaskOptionClick(item)}
-									>
-										{item.name}
-									</button>
-								</div>
-							{/each}
-						</div>
-					{/if}
-				</div>
-			</Select>
+				placeholder={selectTaskPlaceholder}
+			></Select>
 		</div>
 		<!-- fotter -->
 		<div class="p-4 flex justify-end space-x-2">
