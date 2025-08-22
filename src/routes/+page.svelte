@@ -20,6 +20,7 @@
 	import MenuButton from '../icons/Menu.svelte';
 	import AlertWav from '../assets/alert.wav';
 	import { emit, listen } from '@tauri-apps/api/event';
+	import { getCurrentWindow } from '@tauri-apps/api/window';
 	const appWindow = getCurrentWebviewWindow();
 
 	const INTERVAL = 1000 * 60;
@@ -150,6 +151,7 @@
 		if (event.key in shortCutKeys) {
 			event.preventDefault();
 		}
+
 		switch (event.key) {
 			case shortCutKeys.Space:
 				toggleTimer();
@@ -206,7 +208,6 @@
 		initialize();
 
 		await getCurrentWebviewWindow().show();
-		await getCurrentWebviewWindow().setShadow(false);
 	});
 
 	onDestroy(async () => {

@@ -25,7 +25,7 @@ export async function setTaskWindowLancher() {
   }
 
   const setTaskWindow = new WebviewWindow('setTask', {
-    url: '/setTask?top=' + setTaskWindowTop.toString(),
+    url: '/setTask?bottom=' + setTaskWindowTop.toString(),
     title: 'Set Task',
     height: 400,
     width: 500,
@@ -39,9 +39,9 @@ export async function setTaskWindowLancher() {
   setTaskWindow.once('tauri://created', async function () {
     // set window position to bottom of main window
     if (setTaskWindowTop) {
-      await setTaskWindow.setPosition(new PhysicalPosition(innerX, innerY - 200));
+      await setTaskWindow.setPosition(new PhysicalPosition(innerX, innerY - 395));
     } else {
-      await setTaskWindow.setPosition(new PhysicalPosition(innerX, innerY + 55));
+      await setTaskWindow.setPosition(new PhysicalPosition(innerX, innerY + 50));
     }
   });
 
