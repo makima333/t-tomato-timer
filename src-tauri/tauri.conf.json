@@ -41,8 +41,8 @@
   },
   "productName": "tttimer",
   "mainBinaryName": "tttimer",
-  "version": "1.0.1",
-  "identifier": "tttimer",
+  "version": "1.1.0",
+  "identifier": "com.m-lab.tttimer",
   "plugins": {
     "sql": {
       "preload": [
