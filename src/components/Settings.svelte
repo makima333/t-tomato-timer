@@ -1,13 +1,12 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { emit } from '@tauri-apps/api/event';
 	import Select from 'svelte-select';
 
 	import { settings } from '$lib/SettingsStore';
 	import { taskStore } from '$lib/TaskStore';
 
-	let task: any;
-	let selectTaskPlaceholder: string = '';
+	let task = $state<any>(null);
+	let selectTaskPlaceholder = $state<string>('');
 
 	function handleTaskOptionClick(item: any) {
 		if (item) task = item;
@@ -27,9 +26,9 @@
 		task = null;
 	}
 
-	onMount(async () => {
-		await settings.loadSettings();
-		await taskStore.fetchTasks();
+	$effect(() => {
+		settings.loadSettings();
+		taskStore.fetchTasks();
 
 		if ($settings.taskId) {
 			const activeTask = $taskStore.find((t) => t.id === $settings.taskId);
@@ -74,7 +73,7 @@
 								<div class="pt-1 pl-1">
 									<button
 										class="btn btn-ghost w-full justify-start"
-										on:click={() => handleTaskOptionClick(item)}
+										onclick={() => handleTaskOptionClick(item)}
 									>
 										{item.name}
 									</button>
@@ -87,7 +86,7 @@
 		</div>
 		<!-- fotter -->
 		<div class="p-4 flex justify-end space-x-2">
-			<button class="btn btn-primary" on:click={save}>Save</button>
+			<button class="btn btn-primary" onclick={save}>Save</button>
 		</div>
 	</div>
 </main>

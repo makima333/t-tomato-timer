@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
-	import { onDestroy, onMount } from 'svelte';
 	import { writable, get } from 'svelte/store';
 	import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 	import { LogicalSize } from '@tauri-apps/api/dpi';
@@ -22,15 +21,15 @@
 	import { emit, listen } from '@tauri-apps/api/event';
 	const appWindow = getCurrentWebviewWindow();
 
-	const INTERVAL = 1000 * 60;
-	// const INTERVAL = 100;
+	// const INTERVAL = 1000 * 60;
+	const INTERVAL = 100;
 
 	const timerStore = writable({ workTime: 25, breakTime: 5, autoStartSessions: 0 });
-	let taskName = '';
-	let activeTaskId = $settings.taskId as number;
-	let autoStartSessions: number;
-	let workTime = $timerStore.workTime as number;
-	let breakTime = $timerStore.breakTime as number;
+	let taskName = $state('');
+	let activeTaskId = $state($settings.taskId as number);
+	let autoStartSessions = $state<number>(0);
+	let workTime = $state($timerStore.workTime as number);
+	let breakTime = $state($timerStore.breakTime as number);
 
 	function initialize() {
 		activeTaskId = $settings.taskId as number;
@@ -46,14 +45,23 @@
 	const workBreakToggle = writable(true);
 	const audioPlayer = new AudioPlayer(AlertWav, 2);
 
-	$: time.update(() => $timerStore.workTime as number);
-	$: isSoundOn = $settings.alertSound as boolean;
-	$: if ($settings.alwaysOnTop) {
-		appWindow.setAlwaysOnTop(true);
-	} else {
-		appWindow.setAlwaysOnTop(false);
-	}
-	$: autoStartSessions = $timerStore.autoStartSessions as number;
+	let isSoundOn = $derived($settings.alertSound as boolean);
+
+	$effect(() => {
+		time.update(() => $timerStore.workTime as number);
+	});
+
+	$effect(() => {
+		if ($settings.alwaysOnTop) {
+			appWindow.setAlwaysOnTop(true);
+		} else {
+			appWindow.setAlwaysOnTop(false);
+		}
+	});
+
+	$effect(() => {
+		autoStartSessions = $timerStore.autoStartSessions as number;
+	});
 
 	// タイマーを開始する関数
 	function startTimer() {
@@ -133,7 +141,7 @@
 		appWindow.close();
 	}
 
-	let worktimes = Array.from({ length: $timerStore.workTime as number }, (_, i) => i + 1);
+	let worktimes = $state(Array.from({ length: $timerStore.workTime as number }, (_, i) => i + 1));
 
 	time.subscribe((value) => {
 		worktimes = Array.from({ length: value }, (_, i) => i + 1);
@@ -166,7 +174,9 @@
 		}
 	}
 
-	$: appWindow.setSize(new LogicalSize(300 + ($timerStore.workTime as number) * 10, 55));
+	$effect(() => {
+		appWindow.setSize(new LogicalSize(300 + ($timerStore.workTime as number) * 10, 55));
+	});
 
 	const playPauseClickHandler = WithBlur(toggleTimer);
 	const stopClickHandler = WithBlur(stopTimer);
@@ -177,14 +187,14 @@
 		document.getElementById('my-drawer-2')?.click();
 	}
 
-	onMount(async () => {
-		listen('settings-changed', async (event) => {
+	$effect(() => {
+		const unsubscribe1 = listen('settings-changed', async (event) => {
 			stopTimer();
 			await settings.loadSettings();
 			initialize();
 		});
 
-		listen('task-changed', async (event: { payload: { taskId: number } }) => {
+		const unsubscribe2 = listen('task-changed', async (event: { payload: { taskId: number } }) => {
 			const taskId = event.payload?.taskId ?? 0;
 			const taskDBClient = await TaskDBClient.load('sqlite:mydatabase.db');
 			const task = await taskDBClient.read(taskId);
@@ -202,15 +212,17 @@
 			stopTimer();
 		});
 
-		await settings.loadSettings();
+		settings.loadSettings();
 		initialize();
 
-		await getCurrentWebviewWindow().show();
-		await getCurrentWebviewWindow().setShadow(false);
-	});
+		getCurrentWebviewWindow().show();
+		getCurrentWebviewWindow().setShadow(false);
 
-	onDestroy(async () => {
-		clearInterval(intervalId);
+		return () => {
+			unsubscribe1.then((fn) => fn());
+			unsubscribe2.then((fn) => fn());
+			clearInterval(intervalId);
+		};
 	});
 </script>
 
@@ -231,7 +243,7 @@
 					{/if}
 				</span>
 			</div>
-			<button on:click={closeWindow} class="mr-2">
+			<button onclick={closeWindow} class="mr-2">
 				<CloseButton />
 			</button>
 		</div>
@@ -257,31 +269,31 @@
 						{$time}
 					{/if}m
 				</div>
-				<button class="btn btn-sm btn-ghost mr-1" on:click={playPauseClickHandler}>
+				<button class="btn btn-sm btn-ghost mr-1" onclick={playPauseClickHandler}>
 					{#if $playPauseToggle}
 						<PlayButton />
 					{:else}
 						<PauseButton />
 					{/if}
 				</button>
-				<button class="btn btn-sm btn-ghost mr-1" on:click={stopClickHandler}>
+				<button class="btn btn-sm btn-ghost mr-1" onclick={stopClickHandler}>
 					<StopButton />
 				</button>
 
-				<button class="btn btn-sm btn-ghost" on:click={menuClickHnadler}>
+				<button class="btn btn-sm btn-ghost" onclick={menuClickHnadler}>
 					<MenuButton />
 				</button>
 			</div>
 		</div>
 	</div>
 	<div class="drawer-side">
-		<!-- svelte-ignore a11y-click-events-have-key-events -->
-		<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
+		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 		<div
 			role="button"
 			aria-label="close sidebar"
 			class="drawer-overlay"
-			on:click={closeDrawerHandler}
+			onclick={closeDrawerHandler}
 			tabindex="0"
 		></div>
 		<div class=" bg-base-100 h-full text-base-content flex">
@@ -290,7 +302,7 @@
 	</div>
 </main>
 
-<svelte:window on:keydown={onkeydown} />
+<svelte:window {onkeydown} />
 
 <style>
 	:root {

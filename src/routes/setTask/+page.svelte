@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
-	import { onMount } from 'svelte';
 	import Select from 'svelte-select';
 	import { taskStore } from '$lib/TaskStore';
 	import { settings } from '$lib/SettingsStore';
@@ -8,8 +7,8 @@
 
 	const appWindow = getCurrentWebviewWindow();
 
-	let task: any = null;
-	let selectTaskPlaceholder: string = '';
+	let task = $state<any>(null);
+	let selectTaskPlaceholder = $state<string>('');
 
 	function handleTaskOptionClick(item: any) {
 		if (item) {
@@ -32,13 +31,13 @@
 	}
 
 	// focus on input field
-	onMount(async () => {
+	$effect(() => {
 		// tmp fix for focus issue
-		await getCurrentWebviewWindow().hide();
-		await getCurrentWebviewWindow().show();
+		getCurrentWebviewWindow().hide();
+		getCurrentWebviewWindow().show();
 
-		await settings.loadSettings();
-		await taskStore.fetchTasks();
+		settings.loadSettings();
+		taskStore.fetchTasks();
 		// on focus,
 		document.getElementById('active-task-select')?.focus();
 
@@ -76,7 +75,7 @@
 					<div class="pt-1 pl-1">
 						<button
 							class="btn btn-ghost w-full justify-start"
-							on:click={() => handleTaskOptionClick(item)}
+							onclick={() => handleTaskOptionClick(item)}
 						>
 							{item.name}
 						</button>
@@ -87,7 +86,7 @@
 	</Select>
 </main>
 
-<svelte:window on:keydown|capture={onKeyDown} />
+<svelte:window onkeydown={onKeyDown} />
 
 <style>
 	:root {

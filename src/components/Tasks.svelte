@@ -1,14 +1,12 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-
 	import { taskStore } from '$lib/TaskStore';
 	import Save from '$icons/Save.svelte';
 	import Delete from '$icons/Delete.svelte';
 
-	let taskName = '';
+	let taskName = $state('');
 
-	onMount(async () => {
-		await taskStore.fetchTasks();
+	$effect(() => {
+		taskStore.fetchTasks();
 	});
 
 	async function handleKeyPress(event: KeyboardEvent) {
@@ -55,7 +53,7 @@
 				type="text"
 				class="grow"
 				placeholder="Task name"
-				on:keypress={handleKeyPress}
+				onkeypress={handleKeyPress}
 				bind:value={taskName}
 			/>
 			<button class="">+</button>
@@ -81,7 +79,7 @@
 								type="text"
 								value={task.name}
 								class="input w-full"
-								on:input={(e) => handleInputChange(task.id, 'name', e)}
+								oninput={(e) => handleInputChange(task.id, 'name', e)}
 							/>
 						</td>
 						<td>
@@ -89,7 +87,7 @@
 								type="number"
 								value={task.work_time}
 								class="input w-full input-primary"
-								on:input={(e) => handleInputChange(task.id, 'work_time', e)}
+								oninput={(e) => handleInputChange(task.id, 'work_time', e)}
 							/>
 						</td>
 						<td>
@@ -97,7 +95,7 @@
 								type="number"
 								value={task.break_time}
 								class="input w-full input-primary"
-								on:input={(e) => handleInputChange(task.id, 'break_time', e)}
+								oninput={(e) => handleInputChange(task.id, 'break_time', e)}
 							/>
 						</td>
 						<td>
@@ -105,12 +103,12 @@
 								type="number"
 								value={task.auto_start}
 								class="input w-full input-primary"
-								on:input={(e) => handleInputChange(task.id, 'auto_start', e)}
+								oninput={(e) => handleInputChange(task.id, 'auto_start', e)}
 							/>
 						</td>
 						<td>
 							{#if task.edit}
-								<button class="btn btn-ghost btn-xs" on:click={() => handleSave(task.id)}>
+								<button class="btn btn-ghost btn-xs" onclick={() => handleSave(task.id)}>
 									<Save cls={''} />
 								</button>
 							{:else}
@@ -118,7 +116,7 @@
 									<Save cls={''} />
 								</button>
 							{/if}
-							<button on:click={() => handleDelete(task.id)} class="btn btn-ghost btn-xs">
+							<button onclick={() => handleDelete(task.id)} class="btn btn-ghost btn-xs">
 								<Delete cls={''} />
 							</button>
 						</td>
