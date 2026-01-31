@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { emit } from '@tauri-apps/api/event';
+	import { untrack } from 'svelte';
 	import Select from 'svelte-select';
 
 	import { settings } from '$lib/SettingsStore';
@@ -7,14 +8,16 @@
 
 	let task = $state<any>(null);
 	let selectTaskPlaceholder = $state<string>('');
+	let alertSound = $state<boolean>(false);
+	let alwaysOnTop = $state<boolean>(false);
 
 	function handleTaskOptionClick(item: any) {
 		if (item) task = item;
 	}
 
 	async function save() {
-		await settings.updateSettings('alertSound', $settings.alertSound);
-		await settings.updateSettings('alwaysOnTop', $settings.alwaysOnTop);
+		await settings.updateSettings('alertSound', alertSound);
+		await settings.updateSettings('alwaysOnTop', alwaysOnTop);
 		if (task) {
 			await settings.updateSettings('taskId', task.id);
 		} else {
@@ -26,9 +29,18 @@
 		task = null;
 	}
 
+	// Load settings once on mount
 	$effect(() => {
-		settings.loadSettings();
-		taskStore.fetchTasks();
+		untrack(() => {
+			settings.loadSettings();
+			taskStore.fetchTasks();
+		});
+	});
+
+	// Sync local state when settings change
+	$effect(() => {
+		alertSound = $settings.alertSound;
+		alwaysOnTop = $settings.alwaysOnTop;
 
 		if ($settings.taskId) {
 			const activeTask = $taskStore.find((t) => t.id === $settings.taskId);
@@ -46,12 +58,12 @@
 	<div class="p-4 space-y-2">
 		<!-- alert sound -->
 		<label class="input input-bordered flex items-center gap-4">
-			<input type="checkbox" bind:checked={$settings.alertSound} />
+			<input type="checkbox" bind:checked={alertSound} />
 			<span>Alert Sound</span>
 		</label>
 		<!-- always on top -->
 		<label class="input input-bordered flex items-center gap-4">
-			<input type="checkbox" bind:checked={$settings.alwaysOnTop} />
+			<input type="checkbox" bind:checked={alwaysOnTop} />
 			<span>Always on Top</span>
 		</label>
 		<!-- task -->

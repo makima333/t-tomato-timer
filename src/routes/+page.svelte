@@ -27,6 +27,7 @@
 	const timerStore = writable({ workTime: 25, breakTime: 5, autoStartSessions: 0 });
 	let taskName = $state('');
 	let activeTaskId = $state($settings.taskId as number);
+	let previousTaskId = 0;
 	let autoStartSessions = $state<number>(0);
 	let workTime = $state($timerStore.workTime as number);
 	let breakTime = $state($timerStore.breakTime as number);
@@ -36,7 +37,12 @@
 		workTime = $timerStore.workTime as number;
 		breakTime = $timerStore.breakTime as number;
 		autoStartSessions = $timerStore.autoStartSessions as number;
-		emit('task-changed', { taskId: activeTaskId });
+
+		// Only emit if taskId has changed to prevent infinite loop
+		if (activeTaskId !== previousTaskId) {
+			emit('task-changed', { taskId: activeTaskId });
+			previousTaskId = activeTaskId;
+		}
 	}
 
 	let intervalId: number | undefined = undefined;
@@ -138,7 +144,7 @@
 	}
 
 	function closeWindow() {
-		appWindow.close();
+		// appWindow.close();
 	}
 
 	let worktimes = $state(Array.from({ length: $timerStore.workTime as number }, (_, i) => i + 1));
@@ -191,7 +197,10 @@
 		const unsubscribe1 = listen('settings-changed', async (event) => {
 			stopTimer();
 			await settings.loadSettings();
-			initialize();
+			// Reload timer settings without emitting task-changed event
+			workTime = $timerStore.workTime as number;
+			breakTime = $timerStore.breakTime as number;
+			autoStartSessions = $timerStore.autoStartSessions as number;
 		});
 
 		const unsubscribe2 = listen('task-changed', async (event: { payload: { taskId: number } }) => {
@@ -215,7 +224,6 @@
 		settings.loadSettings();
 		initialize();
 
-		getCurrentWebviewWindow().show();
 		getCurrentWebviewWindow().setShadow(false);
 
 		return () => {

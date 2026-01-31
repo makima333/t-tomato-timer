@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
+	import { untrack } from 'svelte';
 	import Select from 'svelte-select';
 	import { taskStore } from '$lib/TaskStore';
 	import { settings } from '$lib/SettingsStore';
@@ -30,17 +31,22 @@
 		}
 	}
 
-	// focus on input field
+	// Load data and focus on mount
 	$effect(() => {
-		// tmp fix for focus issue
-		getCurrentWebviewWindow().hide();
-		getCurrentWebviewWindow().show();
+		untrack(() => {
+			// tmp fix for focus issue
+			// getCurrentWebviewWindow().hide();
+			// getCurrentWebviewWindow().show();
 
-		settings.loadSettings();
-		taskStore.fetchTasks();
-		// on focus,
-		document.getElementById('active-task-select')?.focus();
+			settings.loadSettings();
+			taskStore.fetchTasks();
+			// on focus,
+			document.getElementById('active-task-select')?.focus();
+		});
+	});
 
+	// Update placeholder when settings change
+	$effect(() => {
 		if ($settings.taskId) {
 			const activeTask = $taskStore.find((t) => t.id === $settings.taskId);
 

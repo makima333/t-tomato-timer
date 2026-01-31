@@ -3,21 +3,20 @@ import { currentMonitor } from '@tauri-apps/api/window';
 import { PhysicalPosition } from '@tauri-apps/api/dpi';
 
 export async function setTaskWindowLancher() {
-  // Get the current monitor where the main window is located
-  const monitor = await currentMonitor();
-  
+  console.log('Launching Set Task Window...');
   const setTaskWindow = new WebviewWindow('setTask', {
     url: '/setTask',
     title: 'Set Task',
     height: 200,
     width: 500,
-    decorations: false,
-    transparent: true,
-    resizable: false,
-    shadow: false,
+    decorations: false
   });
+
+  
   
   setTaskWindow.once('tauri://created', async function () {
+    const monitor = await currentMonitor();
+    console.log('Current monitor info:', monitor);
     if (monitor) {
       const { x: posx, y: posy } = monitor.position;
       const {width, height} = monitor.size;
