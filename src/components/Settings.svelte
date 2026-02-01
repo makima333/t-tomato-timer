@@ -10,12 +10,14 @@
 	let selectTaskPlaceholder = $state<string>('');
 	let alertSound = $state<boolean>(false);
 	let alwaysOnTop = $state<boolean>(false);
+	let isInitialized = $state<boolean>(false);
 
 	function handleTaskOptionClick(item: any) {
 		if (item) task = item;
 	}
 
 	async function save() {
+		// Update all settings and wait for file write to complete
 		await settings.updateSettings('alertSound', alertSound);
 		await settings.updateSettings('alwaysOnTop', alwaysOnTop);
 		if (task) {
@@ -23,6 +25,8 @@
 		} else {
 			await settings.updateSettings('taskId', $settings.taskId);
 		}
+
+		// Emit event after all settings are saved
 		await emit('settings-changed', { $settings });
 
 		selectTaskPlaceholder = task ? task.name : 'Select Task';
@@ -31,26 +35,31 @@
 
 	// Load settings once on mount
 	$effect(() => {
-		untrack(() => {
-			settings.loadSettings();
-			taskStore.fetchTasks();
+		untrack(async () => {
+			await settings.loadSettings();
+			await taskStore.fetchTasks();
+			isInitialized = true;
 		});
 	});
 
-	// Sync local state when settings change
+	// Sync local state from store only on initial load
 	$effect(() => {
-		alertSound = $settings.alertSound;
-		alwaysOnTop = $settings.alwaysOnTop;
+		if (!isInitialized) return;
 
-		if ($settings.taskId) {
-			const activeTask = $taskStore.find((t) => t.id === $settings.taskId);
+		untrack(() => {
+			alertSound = $settings.alertSound;
+			alwaysOnTop = $settings.alwaysOnTop;
 
-			if (activeTask) {
-				selectTaskPlaceholder = activeTask.name;
-			} else {
-				selectTaskPlaceholder = 'Select Task';
+			if ($settings.taskId) {
+				const activeTask = $taskStore.find((t) => t.id === $settings.taskId);
+
+				if (activeTask) {
+					selectTaskPlaceholder = activeTask.name;
+				} else {
+					selectTaskPlaceholder = 'Select Task';
+				}
 			}
-		}
+		});
 	});
 </script>
 

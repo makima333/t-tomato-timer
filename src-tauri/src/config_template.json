@@ -1,5 +1,5 @@
 {
     "task_id": 0,
-    "alwaysOnTop": true,
+    "alwaysOnTop": false,
     "alertSound": true
 }
