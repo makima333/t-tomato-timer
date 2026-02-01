@@ -20,13 +20,13 @@
 
 	async function onKeyDown(event: KeyboardEvent) {
 		if (event.key === 'Escape') {
-			appWindow.close();
+			// appWindow.close();
 		}
 		if (event.key === 'Enter') {
 			if (task) {
 				await settings.updateSettings('taskId', task.id);
 				await emit('settings-changed', { $settings });
-				appWindow.close();
+				// appWindow.close();
 			}
 		}
 	}

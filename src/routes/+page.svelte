@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
 	import { writable, get } from 'svelte/store';
+	import { untrack } from 'svelte';
 	import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 	import { LogicalSize } from '@tauri-apps/api/dpi';
 
@@ -181,6 +182,7 @@
 	}
 
 	$effect(() => {
+		// console.log('workTime changed:', $timerStore.workTime);
 		appWindow.setSize(new LogicalSize(300 + ($timerStore.workTime as number) * 10, 55));
 	});
 
@@ -221,8 +223,10 @@
 			stopTimer();
 		});
 
-		settings.loadSettings();
-		initialize();
+		untrack(async () => {
+			await settings.loadSettings();
+			initialize();
+		});
 
 		getCurrentWebviewWindow().setShadow(false);
 

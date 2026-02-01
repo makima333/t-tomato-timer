@@ -55,7 +55,7 @@
       {
         "label": "tttimer",
         "fullscreen": false,
-        "height": 55,
+        "height": 45,
         "resizable": false,
         "title": "tttimer",
         "width": 500,
