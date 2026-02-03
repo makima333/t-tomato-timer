@@ -7,7 +7,6 @@ use tauri_plugin_sql::{Migration, MigrationKind};
 use tauri_plugin_window_state::StateFlags;
 
 fn app_startup(app: &mut tauri::App) -> Result<(), Box<dyn Error>> {
-    // This is the default config that will be written to the config file if it doesn't exist
     const CONFIG: &str = include_str!("./config_template.json");
 
     let app_dir_option = match app.path().app_config_dir() {
@@ -25,6 +24,32 @@ fn app_startup(app: &mut tauri::App) -> Result<(), Box<dyn Error>> {
     if !config_file_path.exists() {
         std::fs::write(&config_file_path, CONFIG).expect("Failed to create config file");
     }
+
+    let main_window = app
+        .get_webview_window("tttimer")
+        .expect("Main window not found");
+
+    let app_handle = app.handle().clone();
+
+    main_window.on_window_event(move |event| {
+        if let tauri::WindowEvent::CloseRequested { .. } = event {
+            // app_handleから全ウィンドウを取得
+            let windows = app_handle.webview_windows();
+
+            // 他のウィンドウを閉じる
+            for (label, window) in &windows {
+                if label != "tttimer" {
+                    let _ = window.close();
+                }
+            }
+
+            // メインウィンドウを閉じる
+            if let Some(main) = windows.get("tttimer") {
+                let _ = main.close();
+            }
+        }
+    });
+
     Ok(())
 }
 

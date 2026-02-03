@@ -3,11 +3,31 @@ import { currentMonitor } from '@tauri-apps/api/window';
 import { PhysicalPosition } from '@tauri-apps/api/dpi';
 
 export async function setTaskWindowLancher() {
-  console.log('Launching Set Task Window...');
+  // Get the current monitor where the main window is located
+  const monitor = await currentMonitor();
+  const mainWindow = await WebviewWindow.getByLabel("tttimer");
+  if (mainWindow === null) {
+      console.warn('Main window not found, closing setTask window');
+      return;
+  }
+  const { x: innerX, y: innerY } = await mainWindow.innerPosition();
+  // Calculate the position of the setTask window based on the main window's position
+  if (monitor === null) {
+      console.warn('Monitor not found, closing setTask window');
+      return;
+  }
+  const { width: monitorWidth, height: monitorHeight } = monitor.size;
+  const setTaskHeightBuffer = 250;
+  // setTask window flg top or bottom of the main window
+  let setTaskWindowTop = false;
+  if (innerY + setTaskHeightBuffer > monitorHeight) {
+      setTaskWindowTop = true;
+  }
+
   const setTaskWindow = new WebviewWindow('setTask', {
-    url: '/setTask',
+    url: '/setTask?bottom=' + setTaskWindowTop.toString(),
     title: 'Set Task',
-    height: 200,
+    height: 400,
     width: 500,
     decorations: false
   });
@@ -28,9 +48,12 @@ export async function setTaskWindowLancher() {
             posy + (height - 200) / 2
           )
         )
+    // set window position to bottom of main window
+    if (setTaskWindowTop) {
+      await setTaskWindow.setPosition(new PhysicalPosition(innerX, innerY - 395));
     } else {
-      console.warn('No monitor information available');
-      await setTaskWindow.center();
+      await setTaskWindow.setPosition(new PhysicalPosition(innerX, innerY + 50));
     }
   });
+
 }

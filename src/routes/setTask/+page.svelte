@@ -11,10 +11,12 @@
 	let task = $state<any>(null);
 	let selectTaskPlaceholder = $state<string>('');
 
-	function handleTaskOptionClick(item: any) {
+	async function handleTaskOptionClick(item: any) {
 		if (item) {
-			task = item;
-			// appWindow.close();
+			await settings.updateSettings('taskId', item.id);
+			await emit('settings-changed', { $settings });
+			value = item;
+			appWindow.close();
 		}
 	}
 
@@ -23,8 +25,8 @@
 			// appWindow.close();
 		}
 		if (event.key === 'Enter') {
-			if (task) {
-				await settings.updateSettings('taskId', task.id);
+			if (value) {
+				await settings.updateSettings('taskId', value.id);
 				await emit('settings-changed', { $settings });
 				// appWindow.close();
 			}
@@ -88,8 +90,8 @@
 					</div>
 				{/each}
 			</div>
-		</div>
-	</Select>
+		</Select>
+	</div>
 </main>
 
 <svelte:window onkeydown={onKeyDown} />

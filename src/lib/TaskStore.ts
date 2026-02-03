@@ -16,6 +16,7 @@ function createTaskStore() {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			tasks.forEach((task: any) => {
 				task.edit = false;
+				task.label = task.name
 			});
 			// sort tasks name 
 			tasks.sort((a: any, b: any) => {

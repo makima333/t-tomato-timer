@@ -61,6 +61,10 @@
 			}
 		});
 	});
+
+	let floatingConfig = {
+		strategy: 'fixed'
+	};
 </script>
 
 <main>
@@ -77,13 +81,12 @@
 		</label>
 		<!-- task -->
 		<div>
-			<label for="active-task-select">Active Task</label>
+			<div class="py-2">Active Task</div>
 			<Select
-				id="active-task-select"
 				class="input input-bordered max-w-sm"
-				placeholder={selectTaskPlaceholder}
 				items={$taskStore}
-				label="name"
+				itemId="id"
+				{floatingConfig}
 				bind:value={task}
 				on:focus={() => (task = null)}
 			>
@@ -104,10 +107,10 @@
 					{/if}
 				</div>
 			</Select>
-		</div>
-		<!-- fotter -->
-		<div class="p-4 flex justify-end space-x-2">
-			<button class="btn btn-primary" onclick={save}>Save</button>
+			<!-- fotter -->
+			<div class="p-4 flex justify-end space-x-2">
+				<button class="btn btn-primary" onclick={save}>Save</button>
+			</div>
 		</div>
 	</div>
 </main>
