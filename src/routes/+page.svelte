@@ -199,10 +199,8 @@
 		const unsubscribe1 = listen('settings-changed', async (event) => {
 			stopTimer();
 			await settings.loadSettings();
-			// Reload timer settings without emitting task-changed event
-			workTime = $timerStore.workTime as number;
-			breakTime = $timerStore.breakTime as number;
-			autoStartSessions = $timerStore.autoStartSessions as number;
+			// Reload all settings including task details
+			initialize();
 		});
 
 		const unsubscribe2 = listen('task-changed', async (event: { payload: { taskId: number } }) => {
