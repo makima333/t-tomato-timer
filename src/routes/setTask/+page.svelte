@@ -8,6 +8,8 @@
 
 	const appWindow = getCurrentWebviewWindow();
 
+	let value: any = null;
+	let setTaskWindowBottom: boolean = false;
 	let task = $state<any>(null);
 	let selectTaskPlaceholder = $state<string>('');
 
@@ -22,13 +24,13 @@
 
 	async function onKeyDown(event: KeyboardEvent) {
 		if (event.key === 'Escape') {
-			// appWindow.close();
+			appWindow.close();
 		}
 		if (event.key === 'Enter') {
 			if (value) {
 				await settings.updateSettings('taskId', value.id);
 				await emit('settings-changed', { $settings });
-				// appWindow.close();
+				appWindow.close();
 			}
 		}
 	}
@@ -65,7 +67,12 @@
 	};
 </script>
 
-<main class="rounded-lg">
+<main
+	class="min-h-screen flex"
+	class:flex-col={true}
+	class:justify-end={setTaskWindowBottom}
+	class:justify-start={!setTaskWindowBottom}
+>
 	<Select
 		id="active-task-select"
 		items={$taskStore}
@@ -90,8 +97,8 @@
 					</div>
 				{/each}
 			</div>
-		</Select>
-	</div>
+		</div>
+	</Select>
 </main>
 
 <svelte:window onkeydown={onKeyDown} />

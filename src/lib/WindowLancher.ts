@@ -41,19 +41,20 @@ export async function setTaskWindowLancher() {
       const { x: posx, y: posy } = monitor.position;
       const {width, height} = monitor.size;
       console.log('Monitor position:', posx===0, posy===0);
-        // Position the window at the center of the monitor
-        await setTaskWindow.setPosition(
-          new PhysicalPosition(
-            posx + (width - 500) / 2,
-            posy + (height - 200) / 2
-          )
+      // Position the window at the center of the monitor
+      await setTaskWindow.setPosition(
+        new PhysicalPosition(
+          posx + (width - 500) / 2,
+          posy + (height - 200) / 2
         )
-    // set window position to bottom of main window
-    if (setTaskWindowTop) {
-      await setTaskWindow.setPosition(new PhysicalPosition(innerX, innerY - 395));
-    } else {
-      await setTaskWindow.setPosition(new PhysicalPosition(innerX, innerY + 50));
+      )
+      // set window position to bottom of main window
+      if (setTaskWindowTop) {
+        await setTaskWindow.setPosition(new PhysicalPosition(innerX, innerY - 395));
+      } else {
+        await setTaskWindow.setPosition(new PhysicalPosition(innerX, innerY + 50));
+      }
+
     }
   });
-
 }
