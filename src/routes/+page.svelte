@@ -238,10 +238,13 @@
 	});
 </script>
 
-<main class="drawer drawer-end bg-slate-50 rounded-lg min-h-screen">
+<main class="drawer drawer-end bg-slate-50 rounded-2xl min-h-screen">
 	<input id="my-drawer-2" type="checkbox" class="drawer-toggle" tabindex="-1" />
-	<div class="drawer-content">
-		<div data-tauri-drag-region class="titlebar h-5 bg-slate-200 flex justify-between rounded-t-lg">
+	<div class="drawer-content rounded-2xl">
+		<div
+			data-tauri-drag-region
+			class="titlebar h-5 bg-slate-200 flex justify-between rounded-t-2xl"
+		>
 			<div data-tauri-drag-region class="text-black pl-2 text-sm">
 				<span
 					data-tauri-drag-region
@@ -298,7 +301,7 @@
 			</div>
 		</div>
 	</div>
-	<div class="drawer-side">
+	<div class="drawer-side rounded-2xl">
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 		<div
@@ -308,7 +311,7 @@
 			onclick={closeDrawerHandler}
 			tabindex="0"
 		></div>
-		<div class=" bg-base-100 h-full text-base-content flex">
+		<div class="bg-base-100 h-full text-base-content flex">
 			<MainMenu closeDrawer={toggleDrawer} />
 		</div>
 	</div>
