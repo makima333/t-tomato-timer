@@ -70,15 +70,16 @@
 <main>
 	<div class="p-4 space-y-2">
 		<!-- alert sound -->
-		<label class="input input-bordered flex items-center gap-4">
-			<input type="checkbox" bind:checked={alertSound} />
+		<div class="space-x-2">
+			<input type="checkbox" class="checkbox" bind:checked={alertSound} />
 			<span>Alert Sound</span>
-		</label>
+		</div>
 		<!-- always on top -->
-		<label class="input input-bordered flex items-center gap-4">
-			<input type="checkbox" bind:checked={alwaysOnTop} />
+		<div class="space-x-2">
+			<input type="checkbox" class="checkbox" bind:checked={alwaysOnTop} />
 			<span>Always on Top</span>
-		</label>
+		</div>
+
 		<!-- task -->
 		<div>
 			<div class="py-2">Active Task</div>

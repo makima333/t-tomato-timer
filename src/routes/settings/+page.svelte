@@ -5,7 +5,7 @@
 </script>
 
 <main class="p-2">
-	<div role="tablist" class="tabs tabs-lifted">
+	<div role="tablist" class="tabs tabs-box">
 		<!-- svelte-ignore a11y_missing_attribute -->
 		<!-- svelte-ignore a11y_interactive_supports_focus -->
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
