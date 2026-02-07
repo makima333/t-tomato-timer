@@ -6,6 +6,7 @@
 	import { LogicalSize } from '@tauri-apps/api/dpi';
 
 	import MainMenu from '../components/MainMenu.svelte';
+	import * as Drawer from '$lib/components/ui/drawer';
 	import { AudioPlayer } from '$lib/AudioPlay';
 	import { WithBlur } from '$lib/WithBlur';
 	import { SetAlwaysOnTopOn, SetAlwaysOnTopOff } from '$lib/WindowApi';
@@ -33,6 +34,7 @@
 	let autoStartSessions = $state<number>(0);
 	let workTime = $state($timerStore.workTime as number);
 	let breakTime = $state($timerStore.breakTime as number);
+	let open = $state(false);
 
 	function initialize() {
 		activeTaskId = $settings.taskId as number;
@@ -142,7 +144,7 @@
 	}
 
 	function toggleDrawer() {
-		document.getElementById('my-drawer-2')?.click();
+		open = !open;
 	}
 
 	function closeWindow() {
@@ -172,7 +174,7 @@
 				toggleTimer();
 				break;
 			case shortCutKeys.Esc:
-				if ((document.getElementById('my-drawer-2') as HTMLInputElement)?.checked) {
+				if (open) {
 					toggleDrawer();
 				}
 				stopTimer();
@@ -191,10 +193,9 @@
 	const playPauseClickHandler = WithBlur(toggleTimer);
 	const stopClickHandler = WithBlur(stopTimer);
 	const menuClickHnadler = WithBlur(toggleDrawer);
-	const closeDrawerHandler = WithBlur(closeDrawer);
 
 	function closeDrawer() {
-		document.getElementById('my-drawer-2')?.click();
+		open = false;
 	}
 
 	$effect(() => {
@@ -238,14 +239,13 @@
 	});
 </script>
 
-<main class="drawer drawer-end bg-slate-50 rounded-sm min-h-screen">
-	<input id="my-drawer-2" type="checkbox" class="drawer-toggle" tabindex="-1" />
-	<div class="drawer-content rounded-2xl">
+<main class="bg-slate-50 rounded-sm min-h-screen">
+	<div class="rounded-2xl">
 		<div data-tauri-drag-region class="titlebar h-5 bg-slate-200 flex justify-between rounded-t-sm">
-			<div data-tauri-drag-region class="text-black pl-2 text-sm">
+			<div data-tauri-drag-region class="text-black pl-2">
 				<span
 					data-tauri-drag-region
-					class="badge badge-xs badge-ghost text-black bg-inherit border-transparent z-50"
+					class="badge badge-sm pb-2 badge-ghost text-black bg-inherit border-transparent z-50"
 					style="cursor: default;"
 				>
 					{#if taskName === 'Pomodoro Timer'}
@@ -267,7 +267,7 @@
 							{#if $workBreakToggle === true}
 								<div class={`w-1.5 h-3 mr-1 rounded-sm bg-info outline outline-1`}></div>
 							{:else}
-								<div class={`w-2 h-6 mr-1 rounded-sm bg-success outline outline-1`}></div>
+								<div class={`w-2 h-3 mr-1 rounded-sm bg-success outline outline-1`}></div>
 							{/if}
 						</div>
 					</li>
@@ -292,24 +292,17 @@
 					<StopButton />
 				</button>
 
-				<button class="btn btn-sm btn-ghost" onclick={menuClickHnadler}>
-					<MenuButton />
-				</button>
+				<Drawer.Root bind:open direction="right">
+					<Drawer.Trigger class="btn btn-sm btn-ghost" onclick={menuClickHnadler}>
+						<MenuButton />
+					</Drawer.Trigger>
+					<Drawer.Content>
+						<div class="p-2 bg-base-100/50">
+							<MainMenu {closeDrawer} />
+						</div>
+					</Drawer.Content>
+				</Drawer.Root>
 			</div>
-		</div>
-	</div>
-	<div class="drawer-side">
-		<!-- svelte-ignore a11y_click_events_have_key_events -->
-		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-		<div
-			role="button"
-			aria-label="close sidebar"
-			class="drawer-overlay"
-			onclick={closeDrawerHandler}
-			tabindex="0"
-		></div>
-		<div class="bg-base-100 h-full text-base-content flex">
-			<MainMenu closeDrawer={toggleDrawer} />
 		</div>
 	</div>
 </main>

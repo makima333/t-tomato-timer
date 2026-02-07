@@ -59,8 +59,8 @@
 	}
 </script>
 
-<div class="flex items-center justify-center space-x-1 mx-4">
-	<button class="btn btn-ghost btn-square" onclick={WithBlur(closeDrawer)}>
+<div class="flex items-center justify-center space-x-1">
+	<button class="btn btn-square" onclick={WithBlur(closeDrawer)}>
 		<CloseMenu />
 	</button>
 	<button class="btn" onclick={WithBlur(toggleAlwaysOnTop)}>
@@ -73,7 +73,7 @@
 			<SoundOff />
 		{/if}
 	</button>
-	<button class="btn btn-ghost" onclick={clickSettingsHandler}>
+	<button class="btn" onclick={clickSettingsHandler}>
 		<Settings />
 	</button>
 </div>
