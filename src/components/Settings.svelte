@@ -1,19 +1,42 @@
 <script lang="ts">
 	import { emit } from '@tauri-apps/api/event';
 	import { untrack } from 'svelte';
-	import Select from 'svelte-select';
+	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 
 	import { settings } from '$lib/SettingsStore';
 	import { taskStore } from '$lib/TaskStore';
+	import {
+		Command,
+		CommandEmpty,
+		CommandInput,
+		CommandItem,
+		CommandList
+	} from '$lib/components/ui/command';
+	import { Popover, PopoverContent, PopoverTrigger } from '$lib/components/ui/popover';
 
 	let task = $state<any>(null);
 	let selectTaskPlaceholder = $state<string>('');
 	let alertSound = $state<boolean>(false);
 	let alwaysOnTop = $state<boolean>(false);
 	let isInitialized = $state<boolean>(false);
+	let open = $state<boolean>(false);
+	let searchTerm = $state<string>('');
+	let triggerRef = $state<HTMLButtonElement>(null!);
 
 	function handleTaskOptionClick(item: any) {
+		console.log('handleTaskOptionClick', item);
 		if (item) task = item;
+	}
+
+	function handleTriggerFocus() {
+		task = null;
+		searchTerm = '';
+		open = true;
+	}
+
+	function handleSelect(item: any) {
+		handleTaskOptionClick(item);
+		open = false;
 	}
 
 	async function save() {
@@ -62,9 +85,7 @@
 		});
 	});
 
-	let floatingConfig = {
-		strategy: 'fixed'
-	};
+	const placeholderText = () => selectTaskPlaceholder || 'Select Task';
 </script>
 
 <main>
@@ -83,31 +104,26 @@
 		<!-- task -->
 		<div>
 			<div class="py-2">Active Task</div>
-			<Select
-				class="input input-bordered max-w-sm"
-				items={$taskStore}
-				itemId="id"
-				{floatingConfig}
-				bind:value={task}
-				on:focus={() => (task = null)}
-			>
-				<div slot="list" let:filteredItems>
-					{#if !task}
-						<div class="max-h-40 overflow-y-auto p-2">
-							{#each filteredItems as item (item.id)}
-								<div class="pt-1 pl-1">
-									<button
-										class="btn btn-ghost w-full justify-start"
-										onclick={() => handleTaskOptionClick(item)}
-									>
-										{item.name}
-									</button>
-								</div>
+			<Popover bind:open>
+				<PopoverTrigger onfocus={handleTriggerFocus} bind:ref={triggerRef}>
+					{#snippet child({ props })}
+						<span {...props} class="truncate input">{task ? task.name : placeholderText()}</span>
+					{/snippet}
+				</PopoverTrigger>
+				<PopoverContent class="p-0 w-72" align="start">
+					<Command>
+						<CommandInput placeholder="Search task..." bind:value={searchTerm} />
+						<CommandList>
+							<CommandEmpty>No task found.</CommandEmpty>
+							{#each $taskStore as item (item.id)}
+								<CommandItem value={String(item.name)} onSelect={() => handleSelect(item)}>
+									{item.name}
+								</CommandItem>
 							{/each}
-						</div>
-					{/if}
-				</div>
-			</Select>
+						</CommandList>
+					</Command>
+				</PopoverContent>
+			</Popover>
 			<!-- fotter -->
 			<div class="p-4 flex justify-end space-x-2">
 				<button class="btn btn-primary" onclick={save}>Save</button>

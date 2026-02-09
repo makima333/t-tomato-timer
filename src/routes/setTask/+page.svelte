@@ -1,10 +1,16 @@
 <script lang="ts">
 	import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 	import { untrack } from 'svelte';
-	import Select from 'svelte-select';
 	import { taskStore } from '$lib/TaskStore';
 	import { settings } from '$lib/SettingsStore';
 	import { emit } from '@tauri-apps/api/event';
+	import {
+		Command,
+		CommandEmpty,
+		CommandInput,
+		CommandItem,
+		CommandList
+	} from '$lib/components/ui/command';
 
 	const appWindow = getCurrentWebviewWindow();
 
@@ -12,6 +18,7 @@
 	let setTaskWindowBottom: boolean = false;
 	let task = $state<any>(null);
 	let selectTaskPlaceholder = $state<string>('');
+	let searchTerm = $state<string>('');
 
 	async function handleTaskOptionClick(item: any) {
 		if (item) {
@@ -20,6 +27,18 @@
 			value = item;
 			appWindow.close();
 		}
+	}
+
+	function handleTriggerFocus() {
+		task = null;
+		value = null;
+		searchTerm = '';
+	}
+
+	async function handleSelect(item: any) {
+		task = item;
+		value = item;
+		await handleTaskOptionClick(item);
 	}
 
 	async function onKeyDown(event: KeyboardEvent) {
@@ -62,9 +81,7 @@
 		}
 	});
 
-	let floatingConfig = {
-		strategy: 'fixed'
-	};
+	const placeholderText = () => selectTaskPlaceholder || 'Select Task';
 </script>
 
 <main
@@ -73,32 +90,23 @@
 	class:justify-end={setTaskWindowBottom}
 	class:justify-start={!setTaskWindowBottom}
 >
-	<Select
-		id="active-task-select"
-		items={$taskStore}
-		label="name"
-		listAutoWidth={true}
-		{floatingConfig}
-		class="input"
-		placeholder={selectTaskPlaceholder || 'Select Task'}
-		bind:value={task}
-		searchable={task ? false : true}
-	>
-		<div slot="list" let:filteredItems>
-			<div class="overflow-y-auto p-2 max-h-28">
-				{#each filteredItems as item (item.id)}
-					<div class="pt-1 pl-1">
-						<button
-							class="btn btn-ghost w-full justify-start"
-							onclick={() => handleTaskOptionClick(item)}
-						>
-							{item.name}
-						</button>
-					</div>
+	<div id="active-task-select" class="w-full">
+		<Command>
+			<CommandInput
+				placeholder={placeholderText()}
+				bind:value={searchTerm}
+				onfocus={handleTriggerFocus}
+			/>
+			<CommandList>
+				<CommandEmpty>No task found.</CommandEmpty>
+				{#each $taskStore as item (item.id)}
+					<CommandItem value={String(item.name)} onSelect={() => handleSelect(item)}>
+						{item.name}
+					</CommandItem>
 				{/each}
-			</div>
-		</div>
-	</Select>
+			</CommandList>
+		</Command>
+	</div>
 </main>
 
 <svelte:window onkeydown={onKeyDown} />
