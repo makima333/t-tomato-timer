@@ -91,13 +91,13 @@
 	class:justify-start={!setTaskWindowBottom}
 >
 	<div id="active-task-select" class="w-full">
-		<Command>
+		<Command class="bg-base-100 border-none">
 			<CommandInput
 				placeholder={placeholderText()}
 				bind:value={searchTerm}
 				onfocus={handleTriggerFocus}
 			/>
-			<CommandList>
+			<CommandList class="bg-base-100">
 				<CommandEmpty>No task found.</CommandEmpty>
 				{#each $taskStore as item (item.id)}
 					<CommandItem value={String(item.name)} onSelect={() => handleSelect(item)}>

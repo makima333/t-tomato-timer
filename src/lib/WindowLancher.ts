@@ -29,7 +29,9 @@ export async function setTaskWindowLancher() {
     title: 'Set Task',
     height: 400,
     width: 500,
-    decorations: false
+    decorations: false,
+    transparent: true,
+    shadow: false
   });
 
   
