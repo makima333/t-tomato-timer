@@ -77,8 +77,6 @@
 		// TODO: Timer Status Store
 		if (intervalId === -1) {
 			intervalId = undefined;
-		} else {
-			time.update((n) => n - 1);
 		}
 		if (intervalId) {
 			clearInterval(intervalId);
@@ -246,6 +244,7 @@
 					data-tauri-drag-region
 					class="badge badge-sm pb-2 badge-ghost text-black bg-inherit border-transparent z-50"
 					style="cursor: default;"
+					title="Set Task shortcut: Ctrl+T"
 				>
 					{#if taskName === 'Pomodoro Timer'}
 						Pomodoro Timer
@@ -264,9 +263,13 @@
 					<li>
 						<div class="timeline-middle">
 							{#if $workBreakToggle === true}
-								<div class={`w-1.5 h-3 mr-1 rounded-sm bg-info outline outline-1`}></div>
+								<div
+									class={`w-1.5 h-3 mr-1 rounded-sm ${$playPauseToggle ? 'bg-slate-300' : 'bg-info'} outline outline-1`}
+								></div>
 							{:else}
-								<div class={`w-2 h-3 mr-1 rounded-sm bg-success outline outline-1`}></div>
+								<div
+									class={`w-2 h-3 mr-1 rounded-sm ${$playPauseToggle ? 'bg-slate-300' : 'bg-success'} outline outline-1`}
+								></div>
 							{/if}
 						</div>
 					</li>
