@@ -136,7 +136,7 @@
 	let worktimes = Array.from({ length: $timerStore.workTime as number }, (_, i) => i + 1);
 
 	time.subscribe((value) => {
-		worktimes = Array.from({ length: value }, (_, i) => i + 1);
+		worktimes = Array.from({ length: Math.max(value, 1) }, (_, i) => i + 1);
 	});
 
 	const shortCutKeys = {
@@ -223,6 +223,7 @@
 					data-tauri-drag-region
 					class="badge badge-xs badge-ghost text-black bg-inherit border-transparent z-50"
 					style="cursor: default;"
+					title="Ctrl+T to set task"
 				>
 					{#if taskName === 'Pomodoro Timer'}
 						Pomodoro Timer
@@ -241,9 +242,9 @@
 					<li>
 						<div class="timeline-middle">
 							{#if $workBreakToggle === true}
-								<div class={`w-1.5 h-3 mr-1 rounded-sm bg-info outline outline-1`}></div>
+								<div class={`w-1.5 h-3 mr-1 rounded-sm ${$playPauseToggle ? 'bg-info' : 'bg-warning'} outline outline-1`}></div>
 							{:else}
-								<div class={`w-2 h-6 mr-1 rounded-sm bg-success outline outline-1`}></div>
+								<div class={`w-2 h-6 mr-1 rounded-sm ${$playPauseToggle ? 'bg-success' : 'bg-warning'} outline outline-1`}></div>
 							{/if}
 						</div>
 					</li>
