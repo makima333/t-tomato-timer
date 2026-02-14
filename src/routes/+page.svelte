@@ -24,8 +24,8 @@
 	import { getCurrentWindow } from '@tauri-apps/api/window';
 	const appWindow = getCurrentWebviewWindow();
 
-	// const INTERVAL = 1000 * 60;
-	const INTERVAL = 100;
+	const INTERVAL = 1000 * 60;
+	// const INTERVAL = 100;
 
 	const timerStore = writable({ workTime: 25, breakTime: 5, autoStartSessions: 0 });
 	let taskName = $state('');
