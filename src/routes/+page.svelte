@@ -9,7 +9,6 @@
 	import * as Drawer from '$lib/components/ui/drawer';
 	import { AudioPlayer } from '$lib/AudioPlay';
 	import { WithBlur } from '$lib/WithBlur';
-	import { SetAlwaysOnTopOn, SetAlwaysOnTopOff } from '$lib/WindowApi';
 	import { setTaskWindowLancher } from '$lib/WindowLancher';
 	import { settings } from '$lib/SettingsStore';
 	import { TaskDBClient } from '$lib/sqls/task';
@@ -21,7 +20,7 @@
 	import MenuButton from '../icons/Menu.svelte';
 	import AlertWav from '../assets/alert.wav';
 	import { emit, listen } from '@tauri-apps/api/event';
-	import { getCurrentWindow } from '@tauri-apps/api/window';
+
 	const appWindow = getCurrentWebviewWindow();
 
 	const INTERVAL = 1000 * 60;
