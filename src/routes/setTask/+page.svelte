@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 	import { untrack } from 'svelte';
+	import { page } from '$app/state';
 	import { taskStore } from '$lib/TaskStore';
 	import { settings } from '$lib/SettingsStore';
 	import { emit } from '@tauri-apps/api/event';
@@ -15,7 +16,7 @@
 	const appWindow = getCurrentWebviewWindow();
 
 	let value: any = null;
-	let setTaskWindowBottom: boolean = false;
+	let setTaskWindowBottom: boolean = page.url.searchParams.get('bottom') === 'true';
 	let task = $state<any>(null);
 	let selectTaskPlaceholder = $state<string>('');
 	let searchTerm = $state<string>('');
@@ -56,15 +57,15 @@
 
 	// Load data and focus on mount
 	$effect(() => {
-		untrack(() => {
+		untrack(async () => {
 			// tmp fix for focus issue
 			// getCurrentWebviewWindow().hide();
-			// getCurrentWebviewWindow().show();
 
 			settings.loadSettings();
 			taskStore.fetchTasks();
+			await getCurrentWebviewWindow().show();
 			// on focus,
-			document.getElementById('active-task-select')?.focus();
+			document.getElementById('bits-c3')?.focus();
 		});
 	});
 
@@ -91,7 +92,7 @@
 	class:justify-start={!setTaskWindowBottom}
 >
 	<div id="active-task-select" class="w-full">
-		<Command class="bg-base-100 border-none">
+		<Command class={`bg-base-100 border-none${setTaskWindowBottom ? ' flex-col-reverse' : ''}`}>
 			<CommandInput
 				placeholder={placeholderText()}
 				bind:value={searchTerm}
