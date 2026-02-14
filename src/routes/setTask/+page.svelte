@@ -1,16 +1,25 @@
 <script lang="ts">
 	import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
-	import { onMount } from 'svelte';
-	import Select from 'svelte-select';
+	import { untrack } from 'svelte';
+	import { page } from '$app/state';
 	import { taskStore } from '$lib/TaskStore';
 	import { settings } from '$lib/SettingsStore';
 	import { emit } from '@tauri-apps/api/event';
+	import {
+		Command,
+		CommandEmpty,
+		CommandInput,
+		CommandItem,
+		CommandList
+	} from '$lib/components/ui/command';
 
 	const appWindow = getCurrentWebviewWindow();
 
 	let value: any = null;
-	let selectTaskPlaceholder: string = '';
-	let setTaskWindowBottom: boolean = false;
+	let setTaskWindowBottom: boolean = page.url.searchParams.get('bottom') === 'true';
+	let task = $state<any>(null);
+	let selectTaskPlaceholder = $state<string>('');
+	let searchTerm = $state<string>('');
 
 	async function handleTaskOptionClick(item: any) {
 		if (item) {
@@ -19,6 +28,18 @@
 			value = item;
 			appWindow.close();
 		}
+	}
+
+	function handleTriggerFocus() {
+		task = null;
+		value = null;
+		searchTerm = '';
+	}
+
+	async function handleSelect(item: any) {
+		task = item;
+		value = item;
+		await handleTaskOptionClick(item);
 	}
 
 	async function onKeyDown(event: KeyboardEvent) {
@@ -34,31 +55,22 @@
 		}
 	}
 
-	// focus on input field
-	onMount(async () => {
-		// get parameter from URL
-		const urlParams = new URLSearchParams(window.location.search);
-		const bottom = urlParams.get('bottom');
-		if (bottom) {
-			setTaskWindowBottom = bottom === 'true';
-			console.log('setTaskWindowBottom:', setTaskWindowBottom);
-		}
+	// Load data and focus on mount
+	$effect(() => {
+		untrack(async () => {
+			// tmp fix for focus issue
+			// getCurrentWebviewWindow().hide();
 
-		// tmp fix for focus issue
-		await getCurrentWebviewWindow().hide();
-		await getCurrentWebviewWindow().show();
+			settings.loadSettings();
+			taskStore.fetchTasks();
+			await getCurrentWebviewWindow().show();
+			// on focus,
+			document.getElementById('bits-c3')?.focus();
+		});
+	});
 
-		await settings.loadSettings();
-		await taskStore.fetchTasks();
-
-		// Select コンポーネントにフォーカス
-		setTimeout(() => {
-			const selectElement = document.getElementById('active-task-select');
-			if (selectElement) {
-				selectElement.focus();
-			}
-		}, 100);
-
+	// Update placeholder when settings change
+	$effect(() => {
 		if ($settings.taskId) {
 			const activeTask = $taskStore.find((t) => t.id === $settings.taskId);
 
@@ -70,9 +82,7 @@
 		}
 	});
 
-	let floatingConfig = {
-		strategy: 'fixed'
-	};
+	const placeholderText = () => selectTaskPlaceholder || 'Select Task';
 </script>
 
 <main
@@ -81,29 +91,26 @@
 	class:justify-end={setTaskWindowBottom}
 	class:justify-start={!setTaskWindowBottom}
 >
-	<div class="w-full" class:mb-2={setTaskWindowBottom} class:mt-2={!setTaskWindowBottom}>
-		<Select
-			id="active-task-select"
-			items={$taskStore}
-			itemId="id"
-			{floatingConfig}
-			bind:value
-			placeholder={selectTaskPlaceholder || 'Select Task'}
-			class="w-full bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-		>
-			<div slot="item" let:item>
-				<button
-					on:click={async () => await handleTaskOptionClick(item)}
-					class="w-full text-left py-2 hover:bg-gray-100 focus:bg-gray-100 transition-colors duration-150"
-				>
-					{item.label}
-				</button>
-			</div>
-		</Select>
+	<div id="active-task-select" class="w-full">
+		<Command class={`bg-base-100 border-none${setTaskWindowBottom ? ' flex-col-reverse' : ''}`}>
+			<CommandInput
+				placeholder={placeholderText()}
+				bind:value={searchTerm}
+				onfocus={handleTriggerFocus}
+			/>
+			<CommandList class="bg-base-100">
+				<CommandEmpty>No task found.</CommandEmpty>
+				{#each $taskStore as item (item.id)}
+					<CommandItem value={String(item.name)} onSelect={() => handleSelect(item)}>
+						{item.name}
+					</CommandItem>
+				{/each}
+			</CommandList>
+		</Command>
 	</div>
 </main>
 
-<svelte:window on:keydown|capture={onKeyDown} />
+<svelte:window onkeydown={onKeyDown} />
 
 <style>
 	:root {

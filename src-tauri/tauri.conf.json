@@ -55,14 +55,13 @@
       {
         "label": "tttimer",
         "fullscreen": false,
-        "height": 55,
+        "height": 45,
         "resizable": false,
         "title": "tttimer",
         "width": 500,
         "decorations": false,
         "transparent": true,
-        "visible": true,
-        "shadow": false
+        "visible": true
       }
     ],
     "security": {

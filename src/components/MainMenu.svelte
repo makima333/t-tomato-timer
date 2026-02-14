@@ -1,5 +1,5 @@
 <script lang="ts">
-	export let closeDrawer = () => {};
+	let { closeDrawer = () => {} }: { closeDrawer?: (event?: MouseEvent) => void } = $props();
 
 	import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
 	import { LogicalSize } from '@tauri-apps/api/dpi';
@@ -19,9 +19,9 @@
 
 	let audioPlayer = new AudioPlayer(AlertWav, 1);
 
-	$: isAlwaysOnTop = $settings.alwaysOnTop;
-	$: isSoundOn = $settings.alertSound;
-	$: clsAlwaysOnTop = isAlwaysOnTop ? 'text-primary' : '';
+	let isAlwaysOnTop = $derived($settings.alwaysOnTop);
+	let isSoundOn = $derived($settings.alertSound);
+	let clsAlwaysOnTop = $derived(isAlwaysOnTop ? 'text-primary' : '');
 
 	function toggleAlwaysOnTop() {
 		if (isAlwaysOnTop) {
@@ -59,21 +59,21 @@
 	}
 </script>
 
-<div class="flex items-center justify-center space-x-1 mx-4">
-	<button class="btn btn-ghost btn-square" on:click={WithBlur(closeDrawer)}>
+<div class="flex items-center justify-center space-x-1">
+	<button class="btn btn-square" onclick={WithBlur(closeDrawer)}>
 		<CloseMenu />
 	</button>
-	<button class="btn" on:click={WithBlur(toggleAlwaysOnTop)}>
+	<button class="btn" onclick={WithBlur(toggleAlwaysOnTop)}>
 		<AlwaysOnTop cls={clsAlwaysOnTop} />
 	</button>
-	<button class="btn" on:click={WithBlur(handleClick)}>
+	<button class="btn" onclick={WithBlur(handleClick)}>
 		{#if isSoundOn}
 			<SoundOn />
 		{:else}
 			<SoundOff />
 		{/if}
 	</button>
-	<button class="btn btn-ghost" on:click={clickSettingsHandler}>
+	<button class="btn" onclick={clickSettingsHandler}>
 		<Settings />
 	</button>
 </div>

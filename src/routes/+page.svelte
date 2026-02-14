@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
-	import { onDestroy, onMount } from 'svelte';
 	import { writable, get } from 'svelte/store';
+	import { untrack } from 'svelte';
 	import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 	import { LogicalSize } from '@tauri-apps/api/dpi';
 
 	import MainMenu from '../components/MainMenu.svelte';
+	import * as Drawer from '$lib/components/ui/drawer';
 	import { AudioPlayer } from '$lib/AudioPlay';
 	import { WithBlur } from '$lib/WithBlur';
-	import { SetAlwaysOnTopOn, SetAlwaysOnTopOff } from '$lib/WindowApi';
 	import { setTaskWindowLancher } from '$lib/WindowLancher';
 	import { settings } from '$lib/SettingsStore';
 	import { TaskDBClient } from '$lib/sqls/task';
@@ -20,25 +20,32 @@
 	import MenuButton from '../icons/Menu.svelte';
 	import AlertWav from '../assets/alert.wav';
 	import { emit, listen } from '@tauri-apps/api/event';
-	import { getCurrentWindow } from '@tauri-apps/api/window';
+
 	const appWindow = getCurrentWebviewWindow();
 
 	const INTERVAL = 1000 * 60;
 	// const INTERVAL = 100;
 
 	const timerStore = writable({ workTime: 25, breakTime: 5, autoStartSessions: 0 });
-	let taskName = '';
-	let activeTaskId = $settings.taskId as number;
-	let autoStartSessions: number;
-	let workTime = $timerStore.workTime as number;
-	let breakTime = $timerStore.breakTime as number;
+	let taskName = $state('');
+	let activeTaskId = $state($settings.taskId as number);
+	let previousTaskId = 0;
+	let autoStartSessions = $state<number>(0);
+	let workTime = $state($timerStore.workTime as number);
+	let breakTime = $state($timerStore.breakTime as number);
+	let open = $state(false);
 
 	function initialize() {
 		activeTaskId = $settings.taskId as number;
 		workTime = $timerStore.workTime as number;
 		breakTime = $timerStore.breakTime as number;
 		autoStartSessions = $timerStore.autoStartSessions as number;
-		emit('task-changed', { taskId: activeTaskId });
+
+		// Only emit if taskId has changed to prevent infinite loop
+		if (activeTaskId !== previousTaskId) {
+			emit('task-changed', { taskId: activeTaskId });
+			previousTaskId = activeTaskId;
+		}
 	}
 
 	let intervalId: number | undefined = undefined;
@@ -47,14 +54,23 @@
 	const workBreakToggle = writable(true);
 	const audioPlayer = new AudioPlayer(AlertWav, 2);
 
-	$: time.update(() => $timerStore.workTime as number);
-	$: isSoundOn = $settings.alertSound as boolean;
-	$: if ($settings.alwaysOnTop) {
-		appWindow.setAlwaysOnTop(true);
-	} else {
-		appWindow.setAlwaysOnTop(false);
-	}
-	$: autoStartSessions = $timerStore.autoStartSessions as number;
+	let isSoundOn = $derived($settings.alertSound as boolean);
+
+	$effect(() => {
+		time.update(() => $timerStore.workTime as number);
+	});
+
+	$effect(() => {
+		if ($settings.alwaysOnTop) {
+			appWindow.setAlwaysOnTop(true);
+		} else {
+			appWindow.setAlwaysOnTop(false);
+		}
+	});
+
+	$effect(() => {
+		autoStartSessions = $timerStore.autoStartSessions as number;
+	});
 
 	// タイマーを開始する関数
 	function startTimer() {
@@ -127,14 +143,14 @@
 	}
 
 	function toggleDrawer() {
-		document.getElementById('my-drawer-2')?.click();
+		open = !open;
 	}
 
 	function closeWindow() {
-		appWindow.close();
+		// appWindow.close();
 	}
 
-	let worktimes = Array.from({ length: $timerStore.workTime as number }, (_, i) => i + 1);
+	let worktimes = $state(Array.from({ length: $timerStore.workTime as number }, (_, i) => i + 1));
 
 	time.subscribe((value) => {
 		worktimes = Array.from({ length: value }, (_, i) => i + 1);
@@ -157,7 +173,7 @@
 				toggleTimer();
 				break;
 			case shortCutKeys.Esc:
-				if ((document.getElementById('my-drawer-2') as HTMLInputElement)?.checked) {
+				if (open) {
 					toggleDrawer();
 				}
 				stopTimer();
@@ -168,25 +184,28 @@
 		}
 	}
 
-	$: appWindow.setSize(new LogicalSize(300 + ($timerStore.workTime as number) * 10, 55));
+	$effect(() => {
+		// console.log('workTime changed:', $timerStore.workTime);
+		appWindow.setSize(new LogicalSize(300 + ($timerStore.workTime as number) * 10, 55));
+	});
 
 	const playPauseClickHandler = WithBlur(toggleTimer);
 	const stopClickHandler = WithBlur(stopTimer);
 	const menuClickHnadler = WithBlur(toggleDrawer);
-	const closeDrawerHandler = WithBlur(closeDrawer);
 
 	function closeDrawer() {
-		document.getElementById('my-drawer-2')?.click();
+		open = false;
 	}
 
-	onMount(async () => {
-		listen('settings-changed', async (event) => {
+	$effect(() => {
+		const unsubscribe1 = listen('settings-changed', async (event) => {
 			stopTimer();
 			await settings.loadSettings();
+			// Reload all settings including task details
 			initialize();
 		});
 
-		listen('task-changed', async (event: { payload: { taskId: number } }) => {
+		const unsubscribe2 = listen('task-changed', async (event: { payload: { taskId: number } }) => {
 			const taskId = event.payload?.taskId ?? 0;
 			const taskDBClient = await TaskDBClient.load('sqlite:mydatabase.db');
 			const task = await taskDBClient.read(taskId);
@@ -204,25 +223,28 @@
 			stopTimer();
 		});
 
-		await settings.loadSettings();
-		initialize();
+		untrack(async () => {
+			await settings.loadSettings();
+			initialize();
+		});
 
-		await getCurrentWebviewWindow().show();
-	});
+		getCurrentWebviewWindow().setShadow(false);
 
-	onDestroy(async () => {
-		clearInterval(intervalId);
+		return () => {
+			unsubscribe1.then((fn) => fn());
+			unsubscribe2.then((fn) => fn());
+			clearInterval(intervalId);
+		};
 	});
 </script>
 
-<main class="drawer drawer-end bg-slate-50 rounded-lg min-h-screen">
-	<input id="my-drawer-2" type="checkbox" class="drawer-toggle" tabindex="-1" />
-	<div class="drawer-content">
-		<div data-tauri-drag-region class="titlebar h-5 bg-slate-200 flex justify-between rounded-t-lg">
-			<div data-tauri-drag-region class="text-black pl-2 text-sm">
+<main class="bg-slate-50 rounded-sm min-h-screen">
+	<div class="rounded-2xl">
+		<div data-tauri-drag-region class="titlebar h-5 bg-slate-200 flex justify-between rounded-t-sm">
+			<div data-tauri-drag-region class="text-black pl-2">
 				<span
 					data-tauri-drag-region
-					class="badge badge-xs badge-ghost text-black bg-inherit border-transparent z-50"
+					class="badge badge-sm pb-2 badge-ghost text-black bg-inherit border-transparent z-50"
 					style="cursor: default;"
 				>
 					{#if taskName === 'Pomodoro Timer'}
@@ -232,7 +254,7 @@
 					{/if}
 				</span>
 			</div>
-			<button on:click={closeWindow} class="mr-2">
+			<button onclick={closeWindow} class="mr-2">
 				<CloseButton />
 			</button>
 		</div>
@@ -244,7 +266,7 @@
 							{#if $workBreakToggle === true}
 								<div class={`w-1.5 h-3 mr-1 rounded-sm bg-info outline outline-1`}></div>
 							{:else}
-								<div class={`w-2 h-6 mr-1 rounded-sm bg-success outline outline-1`}></div>
+								<div class={`w-2 h-3 mr-1 rounded-sm bg-success outline outline-1`}></div>
 							{/if}
 						</div>
 					</li>
@@ -258,40 +280,33 @@
 						{$time}
 					{/if}m
 				</div>
-				<button class="btn btn-sm btn-ghost mr-1" on:click={playPauseClickHandler}>
+				<button class="btn btn-sm btn-ghost mr-1" onclick={playPauseClickHandler}>
 					{#if $playPauseToggle}
 						<PlayButton />
 					{:else}
 						<PauseButton />
 					{/if}
 				</button>
-				<button class="btn btn-sm btn-ghost mr-1" on:click={stopClickHandler}>
+				<button class="btn btn-sm btn-ghost mr-1" onclick={stopClickHandler}>
 					<StopButton />
 				</button>
 
-				<button class="btn btn-sm btn-ghost" on:click={menuClickHnadler}>
-					<MenuButton />
-				</button>
+				<Drawer.Root bind:open direction="right">
+					<Drawer.Trigger class="btn btn-sm btn-ghost" onclick={menuClickHnadler}>
+						<MenuButton />
+					</Drawer.Trigger>
+					<Drawer.Content>
+						<div class="p-2 bg-base-100/50">
+							<MainMenu {closeDrawer} />
+						</div>
+					</Drawer.Content>
+				</Drawer.Root>
 			</div>
-		</div>
-	</div>
-	<div class="drawer-side">
-		<!-- svelte-ignore a11y-click-events-have-key-events -->
-		<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-		<div
-			role="button"
-			aria-label="close sidebar"
-			class="drawer-overlay"
-			on:click={closeDrawerHandler}
-			tabindex="0"
-		></div>
-		<div class=" bg-base-100 h-full text-base-content flex">
-			<MainMenu closeDrawer={toggleDrawer} />
 		</div>
 	</div>
 </main>
 
-<svelte:window on:keydown={onkeydown} />
+<svelte:window {onkeydown} />
 
 <style>
 	:root {
