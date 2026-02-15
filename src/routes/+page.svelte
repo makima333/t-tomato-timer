@@ -77,6 +77,8 @@
 		// TODO: Timer Status Store
 		if (intervalId === -1) {
 			intervalId = undefined;
+		} else {
+			time.update((n) => n - 1);
 		}
 		if (intervalId) {
 			clearInterval(intervalId);
@@ -145,7 +147,7 @@
 	}
 
 	function closeWindow() {
-		// appWindow.close();
+		appWindow.close();
 	}
 
 	let worktimes = $state(Array.from({ length: $timerStore.workTime as number }, (_, i) => i + 1));
