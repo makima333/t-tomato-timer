@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
-	import { writable, get } from 'svelte/store';
 	import { untrack } from 'svelte';
 	import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 	import { LogicalSize } from '@tauri-apps/api/dpi';
@@ -10,8 +9,9 @@
 	import { AudioPlayer } from '$lib/AudioPlay';
 	import { WithBlur } from '$lib/WithBlur';
 	import { setTaskWindowLancher } from '$lib/WindowLancher';
-	import { settings } from '$lib/SettingsStore';
+	import { settings } from '$lib/SettingsStore.svelte';
 	import { TaskDBClient } from '$lib/sqls/task';
+	import { TimerState } from '$lib/TimerState.svelte';
 
 	import CloseButton from '../icons/Close.svelte';
 	import PlayButton from '../icons/Play.svelte';
@@ -23,24 +23,23 @@
 
 	const appWindow = getCurrentWebviewWindow();
 
-	const INTERVAL = 1000 * 60;
-	// const INTERVAL = 100;
+	// const INTERVAL = 1000 * 60;
+	const INTERVAL = 2000;
 
-	const timerStore = writable({ workTime: 25, breakTime: 5, autoStartSessions: 0 });
+	const audioPlayer = new AudioPlayer(AlertWav, 2);
+
+	const timer = new TimerState({
+		audioPlayer,
+		isSoundOn: () => settings.alertSound,
+		interval: INTERVAL
+	});
+
 	let taskName = $state('');
-	let activeTaskId = $state($settings.taskId as number);
 	let previousTaskId = 0;
-	let autoStartSessions = $state<number>(0);
-	let workTime = $state($timerStore.workTime as number);
-	let breakTime = $state($timerStore.breakTime as number);
 	let open = $state(false);
 
 	function initialize() {
-		activeTaskId = $settings.taskId as number;
-		workTime = $timerStore.workTime as number;
-		breakTime = $timerStore.breakTime as number;
-		autoStartSessions = $timerStore.autoStartSessions as number;
-
+		const activeTaskId = settings.taskId;
 		// Only emit if taskId has changed to prevent infinite loop
 		if (activeTaskId !== previousTaskId) {
 			emit('task-changed', { taskId: activeTaskId });
@@ -48,99 +47,15 @@
 		}
 	}
 
-	let intervalId: number | undefined = undefined;
-	const time = writable($timerStore.workTime as number);
-	const playPauseToggle = writable(true);
-	const workBreakToggle = writable(true);
-	const audioPlayer = new AudioPlayer(AlertWav, 2);
-
-	let isSoundOn = $derived($settings.alertSound as boolean);
-
+	// Always-on-top の同期
 	$effect(() => {
-		time.update(() => $timerStore.workTime as number);
+		appWindow.setAlwaysOnTop(settings.alwaysOnTop);
 	});
 
+	// ウィンドウサイズを workTime に連動させる
 	$effect(() => {
-		if ($settings.alwaysOnTop) {
-			appWindow.setAlwaysOnTop(true);
-		} else {
-			appWindow.setAlwaysOnTop(false);
-		}
+		appWindow.setSize(new LogicalSize(300 + timer.workTime * 10, 55));
 	});
-
-	$effect(() => {
-		autoStartSessions = $timerStore.autoStartSessions as number;
-	});
-
-	// タイマーを開始する関数
-	function startTimer() {
-		// TODO: Timer Status Store
-		if (intervalId === -1) {
-			intervalId = undefined;
-		} else {
-			time.update((n) => n - 1);
-		}
-		if (intervalId) {
-			clearInterval(intervalId);
-		}
-		intervalId = setInterval(() => {
-			let isFinished = false;
-			time.update((n) => {
-				if (n === 0) {
-					if (isSoundOn) {
-						audioPlayer.playAudio();
-					}
-					clearInterval(intervalId);
-					intervalId = undefined;
-					playPauseToggle.set(true);
-					if ($workBreakToggle) {
-						workBreakToggle.set(false);
-						isFinished = true;
-						return $timerStore.breakTime as number;
-					}
-					workBreakToggle.set(true);
-					isFinished = true;
-					return $timerStore.workTime as number;
-				}
-				return n - 1;
-			});
-			// 自動スタートの処理
-			if (isFinished && autoStartSessions > 0) {
-				if (get(time) === $timerStore.workTime) {
-					autoStartSessions--;
-				}
-				if (autoStartSessions > 0) {
-					startTimer();
-				} else {
-					autoStartSessions = $timerStore.autoStartSessions as number;
-				}
-			}
-		}, INTERVAL);
-		playPauseToggle.set(false);
-	}
-
-	function toggleTimer() {
-		if (intervalId === undefined || intervalId === -1) {
-			startTimer();
-		} else {
-			pauseTimer();
-		}
-	}
-
-	function pauseTimer() {
-		clearInterval(intervalId);
-		intervalId = -1;
-		playPauseToggle.set(true);
-	}
-
-	function stopTimer() {
-		clearInterval(intervalId);
-		intervalId = undefined;
-		time.set($timerStore.workTime);
-		playPauseToggle.set(true);
-		workBreakToggle.set(true);
-		autoStartSessions = $settings.autoStartSessions as number;
-	}
 
 	function toggleDrawer() {
 		open = !open;
@@ -149,12 +64,6 @@
 	function closeWindow() {
 		appWindow.close();
 	}
-
-	let worktimes = $state(Array.from({ length: $timerStore.workTime as number }, (_, i) => i + 1));
-
-	time.subscribe((value) => {
-		worktimes = Array.from({ length: value }, (_, i) => i + 1);
-	});
 
 	const shortCutKeys = {
 		Space: ' ',
@@ -170,13 +79,13 @@
 
 		switch (event.key) {
 			case shortCutKeys.Space:
-				toggleTimer();
+				timer.toggle();
 				break;
 			case shortCutKeys.Esc:
 				if (open) {
 					toggleDrawer();
 				}
-				stopTimer();
+				timer.stop();
 				break;
 			case event.ctrlKey && shortCutKeys.keyT:
 				setTaskWindowLancher();
@@ -184,24 +93,18 @@
 		}
 	}
 
-	$effect(() => {
-		// console.log('workTime changed:', $timerStore.workTime);
-		appWindow.setSize(new LogicalSize(300 + ($timerStore.workTime as number) * 10, 55));
-	});
-
-	const playPauseClickHandler = WithBlur(toggleTimer);
-	const stopClickHandler = WithBlur(stopTimer);
-	const menuClickHnadler = WithBlur(toggleDrawer);
+	const playPauseClickHandler = WithBlur(() => timer.toggle());
+	const stopClickHandler = WithBlur(() => timer.stop());
+	const menuClickHandler = WithBlur(toggleDrawer);
 
 	function closeDrawer() {
 		open = false;
 	}
 
 	$effect(() => {
-		const unsubscribe1 = listen('settings-changed', async (event) => {
-			stopTimer();
+		const unsubscribe1 = listen('settings-changed', async () => {
+			timer.stop();
 			await settings.loadSettings();
-			// Reload all settings including task details
 			initialize();
 		});
 
@@ -210,17 +113,12 @@
 			const taskDBClient = await TaskDBClient.load('sqlite:mydatabase.db');
 			const task = await taskDBClient.read(taskId);
 			if (task.length > 0) {
-				const { id, name, work_time, break_time, auto_start } = task[0];
+				const { name, work_time, break_time, auto_start } = task[0];
 				taskName = name;
-				timerStore.set({
-					workTime: work_time,
-					breakTime: break_time,
-					autoStartSessions: auto_start
-				});
+				timer.configure(work_time, break_time, auto_start);
 			} else {
 				taskName = 'Pomodoro Timer';
 			}
-			stopTimer();
 		});
 
 		untrack(async () => {
@@ -233,7 +131,7 @@
 		return () => {
 			unsubscribe1.then((fn) => fn());
 			unsubscribe2.then((fn) => fn());
-			clearInterval(intervalId);
+			timer.destroy();
 		};
 	});
 </script>
@@ -261,16 +159,16 @@
 		</div>
 		<div class="ml-4 flex flex-1 justify-between text-slate-500">
 			<ul class="timeline">
-				{#each worktimes as { }}
+				{#each timer.dots as { }}
 					<li>
 						<div class="timeline-middle">
-							{#if $workBreakToggle === true}
+							{#if timer.isWorkPhase}
 								<div
-									class={`w-1.5 h-3 mr-1 rounded-sm ${$playPauseToggle ? 'bg-slate-300' : 'bg-info'} outline outline-1`}
+									class={`w-1.5 h-3 mr-1 rounded-sm ${timer.isPaused ? 'bg-slate-300' : 'bg-info'} outline outline-1`}
 								></div>
 							{:else}
 								<div
-									class={`w-2 h-3 mr-1 rounded-sm ${$playPauseToggle ? 'bg-slate-300' : 'bg-success'} outline outline-1`}
+									class={`w-2 h-3 mr-1 rounded-sm ${timer.isPaused ? 'bg-slate-300' : 'bg-success'} outline outline-1`}
 								></div>
 							{/if}
 						</div>
@@ -279,14 +177,14 @@
 			</ul>
 			<div class="flex items-center justify-center">
 				<div class="flex items-center justify-center mr-1" transition:fade>
-					{#if $time < 10}
-						0{$time}
+					{#if timer.remaining < 10}
+						0{timer.remaining}
 					{:else}
-						{$time}
+						{timer.remaining}
 					{/if}m
 				</div>
 				<button class="btn btn-sm btn-ghost mr-1" onclick={playPauseClickHandler}>
-					{#if $playPauseToggle}
+					{#if timer.isPaused}
 						<PlayButton />
 					{:else}
 						<PauseButton />
@@ -297,7 +195,7 @@
 				</button>
 
 				<Drawer.Root bind:open direction="right">
-					<Drawer.Trigger class="btn btn-sm btn-ghost" onclick={menuClickHnadler}>
+					<Drawer.Trigger class="btn btn-sm btn-ghost" onclick={menuClickHandler}>
 						<MenuButton />
 					</Drawer.Trigger>
 					<Drawer.Content>

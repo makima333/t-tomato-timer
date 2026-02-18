@@ -2,9 +2,10 @@
 	import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 	import { untrack } from 'svelte';
 	import { page } from '$app/state';
-	import { taskStore } from '$lib/TaskStore';
-	import { settings } from '$lib/SettingsStore';
+	import { taskStore } from '$lib/TaskStore.svelte';
+	import { settings } from '$lib/SettingsStore.svelte';
 	import { emit } from '@tauri-apps/api/event';
+	import type { TaskWithEdit } from '$lib/types';
 	import {
 		Command,
 		CommandEmpty,
@@ -15,16 +16,16 @@
 
 	const appWindow = getCurrentWebviewWindow();
 
-	let value: any = null;
+	let value: TaskWithEdit | null = null;
 	let setTaskWindowBottom: boolean = page.url.searchParams.get('bottom') === 'true';
-	let task = $state<any>(null);
+	let task = $state<TaskWithEdit | null>(null);
 	let selectTaskPlaceholder = $state<string>('');
 	let searchTerm = $state<string>('');
 
-	async function handleTaskOptionClick(item: any) {
+	async function handleTaskOptionClick(item: TaskWithEdit) {
 		if (item) {
 			await settings.updateSettings('taskId', item.id);
-			await emit('settings-changed', { $settings });
+			await emit('settings-changed', {});
 			value = item;
 			appWindow.close();
 		}
@@ -36,7 +37,7 @@
 		searchTerm = '';
 	}
 
-	async function handleSelect(item: any) {
+	async function handleSelect(item: TaskWithEdit) {
 		task = item;
 		value = item;
 		await handleTaskOptionClick(item);
@@ -49,7 +50,7 @@
 		if (event.key === 'Enter') {
 			if (value) {
 				await settings.updateSettings('taskId', value.id);
-				await emit('settings-changed', { $settings });
+				await emit('settings-changed', {});
 				appWindow.close();
 			}
 		}
@@ -58,21 +59,17 @@
 	// Load data and focus on mount
 	$effect(() => {
 		untrack(async () => {
-			// tmp fix for focus issue
-			// getCurrentWebviewWindow().hide();
-
-			settings.loadSettings();
-			taskStore.fetchTasks();
+			await settings.loadSettings();
+			await taskStore.fetchTasks();
 			await getCurrentWebviewWindow().show();
-			// on focus,
 			document.getElementById('bits-c3')?.focus();
 		});
 	});
 
 	// Update placeholder when settings change
 	$effect(() => {
-		if ($settings.taskId) {
-			const activeTask = $taskStore.find((t) => t.id === $settings.taskId);
+		if (settings.taskId) {
+			const activeTask = taskStore.tasks.find((t) => t.id === settings.taskId);
 
 			if (activeTask) {
 				selectTaskPlaceholder = activeTask.name;
@@ -100,7 +97,7 @@
 			/>
 			<CommandList class="bg-base-100">
 				<CommandEmpty>No task found.</CommandEmpty>
-				{#each $taskStore as item (item.id)}
+				{#each taskStore.tasks as item (item.id)}
 					<CommandItem value={String(item.name)} onSelect={() => handleSelect(item)}>
 						{item.name}
 					</CommandItem>

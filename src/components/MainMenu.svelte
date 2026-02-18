@@ -8,7 +8,7 @@
 	import { SetSoundOn, SetSoundOff } from '$lib/SoundToggle';
 	import { AudioPlayer } from '$lib/AudioPlay';
 	import { WithBlur } from '$lib/WithBlur';
-	import { settings } from '$lib/SettingsStore';
+	import { settings } from '$lib/SettingsStore.svelte';
 
 	import AlwaysOnTop from '../icons/AlwaysOnTop.svelte';
 	import CloseMenu from '../icons/CloseMenu.svelte';
@@ -19,8 +19,8 @@
 
 	let audioPlayer = new AudioPlayer(AlertWav, 1);
 
-	let isAlwaysOnTop = $derived($settings.alwaysOnTop);
-	let isSoundOn = $derived($settings.alertSound);
+	let isAlwaysOnTop = $derived(settings.alwaysOnTop);
+	let isSoundOn = $derived(settings.alertSound);
 	let clsAlwaysOnTop = $derived(isAlwaysOnTop ? 'text-primary' : '');
 
 	function toggleAlwaysOnTop() {

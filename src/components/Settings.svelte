@@ -3,8 +3,9 @@
 	import { untrack } from 'svelte';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 
-	import { settings } from '$lib/SettingsStore';
-	import { taskStore } from '$lib/TaskStore';
+	import { settings } from '$lib/SettingsStore.svelte';
+	import { taskStore } from '$lib/TaskStore.svelte';
+	import type { TaskWithEdit } from '$lib/types';
 	import {
 		Command,
 		CommandEmpty,
@@ -14,7 +15,7 @@
 	} from '$lib/components/ui/command';
 	import { Popover, PopoverContent, PopoverTrigger } from '$lib/components/ui/popover';
 
-	let task = $state<any>(null);
+	let task = $state<TaskWithEdit | null>(null);
 	let selectTaskPlaceholder = $state<string>('');
 	let alertSound = $state<boolean>(false);
 	let alwaysOnTop = $state<boolean>(false);
@@ -23,8 +24,7 @@
 	let searchTerm = $state<string>('');
 	let triggerRef = $state<HTMLButtonElement>(null!);
 
-	function handleTaskOptionClick(item: any) {
-		console.log('handleTaskOptionClick', item);
+	function handleTaskOptionClick(item: TaskWithEdit) {
 		if (item) task = item;
 	}
 
@@ -34,23 +34,19 @@
 		open = true;
 	}
 
-	function handleSelect(item: any) {
+	function handleSelect(item: TaskWithEdit) {
 		handleTaskOptionClick(item);
 		open = false;
 	}
 
 	async function save() {
-		// Update all settings and wait for file write to complete
 		await settings.updateSettings('alertSound', alertSound);
 		await settings.updateSettings('alwaysOnTop', alwaysOnTop);
 		if (task) {
 			await settings.updateSettings('taskId', task.id);
-		} else {
-			await settings.updateSettings('taskId', $settings.taskId);
 		}
 
-		// Emit event after all settings are saved
-		await emit('settings-changed', { $settings });
+		await emit('settings-changed', {});
 
 		selectTaskPlaceholder = task ? task.name : 'Select Task';
 		task = null;
@@ -70,11 +66,11 @@
 		if (!isInitialized) return;
 
 		untrack(() => {
-			alertSound = $settings.alertSound;
-			alwaysOnTop = $settings.alwaysOnTop;
+			alertSound = settings.alertSound;
+			alwaysOnTop = settings.alwaysOnTop;
 
-			if ($settings.taskId) {
-				const activeTask = $taskStore.find((t) => t.id === $settings.taskId);
+			if (settings.taskId) {
+				const activeTask = taskStore.tasks.find((t) => t.id === settings.taskId);
 
 				if (activeTask) {
 					selectTaskPlaceholder = activeTask.name;
@@ -115,7 +111,7 @@
 						<CommandInput placeholder="Search task..." bind:value={searchTerm} />
 						<CommandList>
 							<CommandEmpty>No task found.</CommandEmpty>
-							{#each $taskStore as item (item.id)}
+							{#each taskStore.tasks as item (item.id)}
 								<CommandItem value={String(item.name)} onSelect={() => handleSelect(item)}>
 									{item.name}
 								</CommandItem>

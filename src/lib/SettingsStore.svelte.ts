@@ -31,7 +31,7 @@ class SettingsState {
 	}
 
 	async updateSettings<K extends keyof Settings>(key: K, value: Settings[K]): Promise<void> {
-		(this as Settings)[key] = value;
+		this[key] = value;
 		try {
 			const settingsObj: Settings = {
 				taskId: this.taskId,

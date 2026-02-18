@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { taskStore } from '$lib/TaskStore';
+	import { taskStore } from '$lib/TaskStore.svelte';
 	import Save from '$icons/Save.svelte';
 	import Delete from '$icons/Delete.svelte';
 
@@ -16,21 +16,21 @@
 		}
 	}
 
-	async function handleInputChange(taskId: number, fieldName: string, event: Event) {
+	function handleInputChange(taskId: number, fieldName: string, event: Event) {
 		const target = event.target as HTMLInputElement;
 		if (target.value.length > 0) {
-			if (target.value !== $taskStore.find((task: any) => task.id === taskId)[fieldName]) {
-				// enable save button
-				await taskStore.editingTask(taskId, fieldName, target.value);
+			const existing = taskStore.tasks.find((t) => t.id === taskId);
+			if (existing && target.value !== String(existing[fieldName as keyof typeof existing])) {
+				taskStore.editingTask(taskId, fieldName, target.value);
 			} else {
-				// disable save button
-				await taskStore.cancelEditingTask(taskId);
+				taskStore.cancelEditingTask(taskId);
 			}
 		}
 	}
 
 	async function handleSave(taskId: number) {
-		const updatedTask = $taskStore.find((task: any) => task.id === taskId);
+		const updatedTask = taskStore.tasks.find((t) => t.id === taskId);
+		if (!updatedTask) return;
 		const updates = {
 			name: updatedTask.name,
 			work_time: updatedTask.work_time,
@@ -72,7 +72,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				{#each $taskStore as task}
+				{#each taskStore.tasks as task}
 					<tr>
 						<td>
 							<input
