@@ -23,8 +23,8 @@
 
 	const appWindow = getCurrentWebviewWindow();
 
-	// const INTERVAL = 1000 * 60;
-	const INTERVAL = 2000;
+	const INTERVAL = 1000;
+	// const INTERVAL = 100;
 
 	const audioPlayer = new AudioPlayer(AlertWav, 2);
 
@@ -177,11 +177,19 @@
 			</ul>
 			<div class="flex items-center justify-center">
 				<div class="flex items-center justify-center mr-1" transition:fade>
-					{#if timer.remaining < 10}
-						0{timer.remaining}
+					{#if timer.isUnderOneMinute}
+						{#if timer.displaySeconds < 10}
+							0{timer.displaySeconds}
+						{:else}
+							{timer.displaySeconds}
+						{/if}s
 					{:else}
-						{timer.remaining}
-					{/if}m
+						{#if timer.displayMinutes < 10}
+							0{timer.displayMinutes}
+						{:else}
+							{timer.displayMinutes}
+						{/if}m
+					{/if}
 				</div>
 				<button class="btn btn-sm btn-ghost mr-1" onclick={playPauseClickHandler}>
 					{#if timer.isPaused}

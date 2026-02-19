@@ -14,8 +14,8 @@ export class TimerState {
 	autoStartMax = $state<number>(0);
 
 	// --- ランタイム状態 ---
-	/** 残り時間（分） */
-	remaining = $state<number>(25);
+	/** 残り時間（秒） */
+	remaining = $state<number>(25 * 60);
 	/** タイマーの状態 */
 	status = $state<TimerStatus>('idle');
 	/** true = 作業フェーズ、false = 休憩フェーズ */
@@ -26,10 +26,21 @@ export class TimerState {
 	// --- 導出値 ---
 	/** タイマーが一時停止 or 停止中か */
 	isPaused = $derived(this.status !== 'running');
-	/** タイムラインのドット配列 */
+	/** 表示用: 残り分 */
+	displayMinutes = $derived(Math.floor(Math.max(0, this.remaining) / 60));
+	/** 表示用: 残り秒（60未満の端数） */
+	displaySeconds = $derived(Math.max(0, this.remaining) % 60);
+	/** 残り1分未満かどうか */
+	isUnderOneMinute = $derived(this.remaining >= 0 && this.remaining < 60);
+	/** タイムラインのドット配列（分単位） */
 	dots = $derived(
 		Array.from(
-			{ length: this.status === 'idle' ? this.remaining : this.remaining + 1 },
+			{
+				length:
+					this.status === 'idle'
+						? this.remaining / 60
+						: Math.floor(this.remaining / 60) + 1
+			},
 			(_, i) => i + 1
 		)
 	);
@@ -47,7 +58,7 @@ export class TimerState {
 	}) {
 		this.audioPlayer = opts.audioPlayer;
 		this.isSoundOn = opts.isSoundOn;
-		this.interval = opts.interval ?? 1000 * 60;
+		this.interval = opts.interval ?? 1000;
 	}
 
 	/** タスク変更時に呼ぶ。タイマーは停止する。 */
@@ -90,7 +101,7 @@ export class TimerState {
 	/** 停止してリセット */
 	stop(): void {
 		this.clearInterval();
-		this.remaining = this.workTime;
+		this.remaining = this.workTime * 60;
 		this.status = 'idle';
 		this.isWorkPhase = true;
 		this.autoStartRemaining = this.autoStartMax;
@@ -125,11 +136,11 @@ export class TimerState {
 		if (this.isWorkPhase) {
 			// 作業 → 休憩
 			this.isWorkPhase = false;
-			this.remaining = this.breakTime;
+			this.remaining = this.breakTime * 60;
 		} else {
 			// 休憩 → 作業
 			this.isWorkPhase = true;
-			this.remaining = this.workTime;
+			this.remaining = this.workTime * 60;
 		}
 
 		// 自動スタート処理
