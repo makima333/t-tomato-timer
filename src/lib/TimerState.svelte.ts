@@ -115,12 +115,12 @@ export class TimerState {
 	// --- private ---
 
 	private tick(): void {
-		if (this.remaining <= -1) {
+		if (this.remaining <= 0) {
 			this.onPhaseEnd();
 			return;
 		}
 		this.remaining -= 1;
-		if (this.remaining <= -1) {
+		if (this.remaining <= 0) {
 			this.onPhaseEnd();
 		}
 	}
@@ -150,7 +150,8 @@ export class TimerState {
 				this.autoStartRemaining--;
 			}
 			if (this.autoStartRemaining > 0) {
-				this.start();
+        // delay 1s 
+        setTimeout(() => this.start(), 1000);
 			} else {
 				// 全セッション完了 → リセット
 				this.autoStartRemaining = this.autoStartMax;
